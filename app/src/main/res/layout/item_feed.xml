@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/item_dashboard_feed">
+
+    <TextView
+        android:id="@+id/txtFeedDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/app_description" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        >
+    </View>
+
+    <TextView
+        android:id="@+id/txtFeedDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="viewEnd"
+        android:textSize="12dp"
+        android:textStyle="italic"
+        android:text="Tue, 29 June 2016, on 18:43" />
+
+</LinearLayout>

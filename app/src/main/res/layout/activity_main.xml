@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinatorLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.ssudio.sfr.MainActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:id="@+id/mainContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_above="@+id/bottom_navigation" />
+
+        <!--<fragment
+            android:id="@+id/testContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            class="com.ssudio.sfr.ui.ReportFragment" />-->
+
+        <com.aurelhubert.ahbottomnavigation.AHBottomNavigation
+            android:id="@+id/bottom_navigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"/>
+
+        <!--<LinearLayout
+            android:id="@+id/toolbarBottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true"
+            android:visibility="gone">
+
+            <ImageButton
+                android:id="@+id/imgButtonDashboard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight=".2"
+                android:background="@drawable/house"/>
+
+            <ImageButton
+                android:id="@+id/imgButtonProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight=".2"
+                android:background="@drawable/avatar"/>
+
+            <ImageButton
+                android:id="@+id/imgButtonReport"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight=".2"
+                android:background="@drawable/book"/>
+
+            <ImageButton
+                android:id="@+id/imgButtonShare"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight=".2"
+                android:background="@drawable/share"/>
+
+            <ImageButton
+                android:id="@+id/imgButtonExit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight=".2"
+                android:background="@drawable/settings" />
+        </LinearLayout>-->
+
+    </RelativeLayout>
+
+</android.support.design.widget.CoordinatorLayout>

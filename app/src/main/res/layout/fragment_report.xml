@@ -1,0 +1,82 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="1"
+        tools:context=".ui.ReportFragment">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/start_date"/>
+        <EditText
+            android:id="@+id/txtStartDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/end_date"/>
+        <EditText
+            android:id="@+id/txtEndDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btnSubmit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_marginTop="32dp"
+            android:text="Submit" />
+
+        <TableLayout
+            android:id="@+id/tblLayoutContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:stretchColumns="*"
+            android:shrinkColumns="*">
+
+            <TableRow
+                android:id="@+id/tableRowHeader"
+                android:layout_width="match_parent"
+                android:layout_height="16dp"
+                android:padding="5dip">
+                <TextView
+                    android:id="@+id/txtHeaderNumber"
+                    android:text="No"
+                    android:layout_weight="1"/>
+                <TextView
+                    android:id="@+id/txtHeaderDate"
+                    android:text="Tanggal"
+                    android:layout_weight="1"/>
+                <TextView
+                    android:id="@+id/txtHeaderName"
+                    android:text="Nama"
+                    android:layout_weight="1"/>
+                <TextView
+                    android:id="@+id/txtHeaderTotal"
+                    android:text="Jumlah"
+                    android:layout_weight="1"/>
+            </TableRow>
+        </TableLayout>
+
+        <TextView
+            android:id="@+id/txtTotal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Jumlah total: 999"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</ScrollView>
+

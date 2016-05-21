@@ -1,0 +1,35 @@
+{
+  "project_info": {
+    "project_number": "674808614785",
+    "project_id": "simple-financial-report"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:674808614785:android:41f47a2af489a1ea",
+        "android_client_info": {
+          "package_name": "com.ssudio.sfr"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVNaauFs33tv9eMjXopYsedkZ3M3bYb0k"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
