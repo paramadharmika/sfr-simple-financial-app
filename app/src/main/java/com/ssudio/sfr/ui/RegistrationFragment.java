@@ -155,6 +155,7 @@ public class RegistrationFragment extends Fragment implements IRegistrationView 
             txtName.setText(e.getModel().getName());
             txtPhone.setText(e.getModel().getPhoneNumber());
             txtVerificationCode.setText(e.getModel().getVerificationCode());
+            txtVerificationCode.setEnabled(false);
         } else {
             getUpperHandler().showMessage(e.getIsSuccess(), e.getMessage());
         }
