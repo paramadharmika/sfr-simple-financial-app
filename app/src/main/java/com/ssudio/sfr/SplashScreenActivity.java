@@ -119,6 +119,7 @@ public class SplashScreenActivity extends AppCompatActivity implements ISplashSc
                             startActivity(new Intent(SplashScreenActivity.this, RegistrationActivity.class));
                         }
 
+                        finish();
 //                        Handler handler = new Handler();
 //                        handler.postDelayed(new Runnable() {
 //                            @Override
