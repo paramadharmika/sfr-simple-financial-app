@@ -5,14 +5,13 @@ import com.google.gson.reflect.TypeToken;
 import com.ssudio.sfr.configuration.IAppConfiguration;
 import com.ssudio.sfr.dashboard.events.DashboardEvent;
 import com.ssudio.sfr.dashboard.model.DashboardFeedModel;
+import com.ssudio.sfr.dashboard.events.APIDashboardCallProgressEvent;
+import com.ssudio.sfr.network.event.NetworkConnectivityEvent;
 import com.ssudio.sfr.network.response.SFRApiGetResponse;
-import com.ssudio.sfr.splashscreen.event.SplashScreenEvent;
-import com.ssudio.sfr.splashscreen.model.SplashScreenModel;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -45,12 +44,7 @@ public class DashboardCommand implements IDashboardCommand {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                //todo: post network io exception to main view
-//                if (isNewUser) {
-//                    EventBus.getDefault().post(new RegistrationEvent(false, e.getMessage(), null));
-//                } else {
-//                    EventBus.getDefault().post(new UpdateRegistrationEvent(false, e.getMessage(), null));
-//                }
+                EventBus.getDefault().post(new NetworkConnectivityEvent(false));
             }
 
             @Override
@@ -65,5 +59,7 @@ public class DashboardCommand implements IDashboardCommand {
                 EventBus.getDefault().post(event);
             }
         });
+
+        EventBus.getDefault().post(new APIDashboardCallProgressEvent(true));
     }
 }

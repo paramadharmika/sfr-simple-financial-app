@@ -3,6 +3,8 @@ package com.ssudio.sfr.registration.command;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.ssudio.sfr.configuration.IAppConfiguration;
+import com.ssudio.sfr.registration.event.APIGetUserCallProgressEvent;
+import com.ssudio.sfr.network.event.NetworkConnectivityEvent;
 import com.ssudio.sfr.network.request.SFRGeneralPostParameter;
 import com.ssudio.sfr.network.response.SFRApiGetResponse;
 import com.ssudio.sfr.registration.event.ProfileEvent;
@@ -23,7 +25,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class GetProfileCommand implements IGetProfileCommand {
-    private boolean isNewUser;
     private IAppConfiguration appConfiguration;
     private OkHttpClient client;
     private Gson gson;
@@ -51,13 +52,7 @@ public class GetProfileCommand implements IGetProfileCommand {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                //todo: post io network exception
-//                ProfileEvent profileEvent = new ProfileEvent(false,
-//                        e.getMessage(),
-//                        ProfileEvent.IO_NETWORK_EXCEPTION,
-//                        null);
-//
-//                EventBus.getDefault().post(profileEvent);
+                EventBus.getDefault().post(new NetworkConnectivityEvent(false));
             }
 
             @Override
@@ -77,5 +72,7 @@ public class GetProfileCommand implements IGetProfileCommand {
                 EventBus.getDefault().post(profileEvent);
             }
         });
+
+        EventBus.getDefault().post(new APIGetUserCallProgressEvent(true));
     }
 }

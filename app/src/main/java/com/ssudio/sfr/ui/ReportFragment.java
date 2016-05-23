@@ -1,5 +1,6 @@
 package com.ssudio.sfr.ui;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -12,7 +13,9 @@ import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.kaopiz.kprogresshud.KProgressHUD;
 import com.ssudio.sfr.R;
 import com.ssudio.sfr.SFRApplication;
 
@@ -24,6 +27,9 @@ import com.ssudio.sfr.modules.LocalAuthenticationModule;
 import com.ssudio.sfr.modules.LocalStorageModule;
 import com.ssudio.sfr.modules.NetworkModule;
 import com.ssudio.sfr.modules.ReportModule;
+import com.ssudio.sfr.network.event.NetworkConnectivityEvent;
+import com.ssudio.sfr.network.ui.IConnectivityListenerView;
+import com.ssudio.sfr.network.ui.ILoadingView;
 import com.ssudio.sfr.report.model.ReportRequestModel;
 import com.ssudio.sfr.report.model.ReportResponseModel;
 import com.ssudio.sfr.report.presenter.IReportView;
@@ -45,11 +51,12 @@ import butterknife.OnClick;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ReportFragment extends Fragment implements IReportView {
-    @Inject
-    ReportPresenter presenter;
+public class ReportFragment extends Fragment implements IReportView, IConnectivityListenerView, ILoadingView {
     @Inject
     LocalAuthenticationService localAuthService;
+    @Inject
+    ReportPresenter reportPresenter;
+
 
     @BindView(R.id.txtStartDate)
     protected EditText txtStartDate;
@@ -84,11 +91,6 @@ public class ReportFragment extends Fragment implements IReportView {
 
         dateFormatter = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
 
-        /*ReportComponents components = DaggerReportComponents.builder()
-                .sFRApplicationModule(((SFRApplication)getActivity().getApplication()).getSfrApplicationModule())
-                .reportModule(new ReportModule(this))
-                .build();*/
-
         BasePresenterComponent basePresenterComponent = DaggerBasePresenterComponent.builder()
                 .sFRApplicationModule(((SFRApplication)getActivity().getApplication()).getSfrApplicationModule())
                 .localStorageModule(new LocalStorageModule())
@@ -96,7 +98,7 @@ public class ReportFragment extends Fragment implements IReportView {
                 .networkModule(new NetworkModule())
                 .build();
 
-        ReportComponents components = basePresenterComponent.newReportSubComponent(new ReportModule(this));
+        ReportComponents components = basePresenterComponent.newReportSubComponent(new ReportModule(this, this, this));
 
         components.inject(this);
 
@@ -172,7 +174,12 @@ public class ReportFragment extends Fragment implements IReportView {
 
         ReportRequestModel model = new ReportRequestModel(dateStart, dateEnd, verificationCode);
 
-        presenter.getReport(model);
+        reportPresenter.getReport(model);
+    }
+
+    @Override
+    public IContainerViewCallback getParentView() {
+        return (IContainerViewCallback)getActivity();
     }
 
     @Override
@@ -180,14 +187,21 @@ public class ReportFragment extends Fragment implements IReportView {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                bindInfo(result);
+                if (result.size() == 0) {
+                    getParentView().showMessage(false,
+                            getResources().getString(R.string.message_report_not_found));
+                } else {
+                    bindInfo(result);
+                }
             }
         });
     }
 
     private void bindInfo(ArrayList<ReportResponseModel> result) {
         while (tblLayoutContainer.getChildCount() > 1) {
-            tblLayoutContainer.removeView(tblLayoutContainer.getChildAt(tblLayoutContainer.getChildCount() - 1));
+            View v = tblLayoutContainer.getChildAt(tblLayoutContainer.getChildCount() - 1);
+
+            tblLayoutContainer.removeView(v);
         }
 
         double total = 0;
@@ -248,12 +262,50 @@ public class ReportFragment extends Fragment implements IReportView {
 
     private void bindTotalLabel(double total) {
         txtTotal.setVisibility(View.VISIBLE);
-        txtTotal.setText("Jumlah total: " + String.valueOf(total));
+        txtTotal.setText(getResources().getString(R.string.total_amount) + String.valueOf(total));
+    }
+
+    @Override
+    public void showMessage(final NetworkConnectivityEvent e) {
+        final Activity activity = getActivity();
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String message;
+
+                if (e.isConnected()) {
+                    message = getString(R.string.message_network_connected);
+                } else {
+                    message = getString(R.string.message_network_is_not_connected);
+                }
+
+                Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    public void showLoading() {
+        getParentView().showLoading();
+        /*loadingView = KProgressHUD.create(getActivity())
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setLabel("Please wait")
+                .setCancellable(true)
+                .setAnimationSpeed(2)
+                .setDimAmount(0.5f);
+
+        loadingView.show();*/
+    }
+
+    @Override
+    public void dismissLoading() {
+        getParentView().dismissLoading();
     }
 
     @Override
     public void onDestroy() {
-        presenter.unregisterEventHandler();
+        reportPresenter.unregisterEventHandler();
 
         super.onDestroy();
     }

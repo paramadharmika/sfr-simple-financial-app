@@ -3,22 +3,29 @@ package com.ssudio.sfr.dashboard.presenter;
 import com.ssudio.sfr.dashboard.command.IDashboardCommand;
 import com.ssudio.sfr.dashboard.events.DashboardEvent;
 import com.ssudio.sfr.dashboard.model.DashboardFeedModel;
-import com.ssudio.sfr.registration.event.ProfileEvent;
+import com.ssudio.sfr.dashboard.events.APIDashboardCallProgressEvent;
+import com.ssudio.sfr.network.ui.ILoadingView;
+import com.ssudio.sfr.network.ui.IConnectivityListenerView;
+import com.ssudio.sfr.network.event.NetworkConnectivityEvent;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 
-import javax.inject.Inject;
-
 public class DashboardPresenter implements IDashboardPresenter {
     private IDashboardCommand dashboardCommand;
     private IDashboardView view;
+    private IConnectivityListenerView connectivityListenerView;
+    private ILoadingView loadingView;
     private ArrayList<DashboardFeedModel> temporaryList;
 
-    public DashboardPresenter(IDashboardView view) {
+    public DashboardPresenter(IDashboardView view,
+                              IConnectivityListenerView connectivityListenerView,
+                              ILoadingView loadingView) {
         this.view = view;
+        this.connectivityListenerView = connectivityListenerView;
+        this.loadingView = loadingView;
 
         EventBus.getDefault().register(this);
     }
@@ -41,6 +48,17 @@ public class DashboardPresenter implements IDashboardPresenter {
         }*/
 
         view.bindContent(e.getModel());
+        loadingView.dismissLoading();
+    }
+
+    @Subscribe
+    public void onAPIDashboardCallProgressEvent(APIDashboardCallProgressEvent e) {
+        loadingView.showLoading();
+    }
+
+    @Subscribe
+    public void onNetworkEvent(NetworkConnectivityEvent e) {
+        connectivityListenerView.showMessage(e);
     }
 
     @Override

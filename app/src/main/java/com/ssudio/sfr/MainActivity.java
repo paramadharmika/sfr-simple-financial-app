@@ -10,7 +10,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
@@ -26,12 +25,13 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
+import com.kaopiz.kprogresshud.KProgressHUD;
 import com.ssudio.sfr.components.app.DaggerLocalStorageComponents;
 import com.ssudio.sfr.components.app.LocalStorageComponents;
 import com.ssudio.sfr.device.QuickstartPreferences;
 import com.ssudio.sfr.device.SfrGcmRegistrationIntentService;
 import com.ssudio.sfr.modules.LocalStorageModule;
-import com.ssudio.sfr.registration.presenter.IRegistrationContainerView;
+import com.ssudio.sfr.ui.IContainerViewCallback;
 import com.ssudio.sfr.ui.DashboardFragment;
 import com.ssudio.sfr.ui.RegistrationFragment;
 import com.ssudio.sfr.ui.ReportFragment;
@@ -41,7 +41,7 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements IRegistrationContainerView {
+public class MainActivity extends AppCompatActivity implements IContainerViewCallback {
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static final String TAG = "MainActivity";
     private static final String FRAGMENT_TAG = "main_container";
@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements IRegistrationCont
 
     @BindView(R.id.coordinatorLayout)
     protected CoordinatorLayout coordinatorLayout;
+    private KProgressHUD loadingView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,24 +74,22 @@ public class MainActivity extends AppCompatActivity implements IRegistrationCont
                 .localStorageModule(new LocalStorageModule())
                 .build();
 
-        /*localStorageComponents.inject(this);*/
+        localStorageComponents.inject(this);
 
         //below is the google cloud messaging registration process
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                SharedPreferences sharedPreferences =
-                        PreferenceManager.getDefaultSharedPreferences(context);
+                /*SharedPreferences sharedPreferences =
+                        PreferenceManager.getDefaultSharedPreferences(context);*/
 
                 boolean sentToken = sharedPreferences
                         .getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
 
                 if (sentToken) {
                     Toast.makeText(context, "token send", Toast.LENGTH_SHORT).show();
-                    /*mInformationTextView.setText(getString(R.string.gcm_send_message));*/
                 } else {
                     Toast.makeText(context, "token error", Toast.LENGTH_SHORT).show();
-                    /*mInformationTextView.setText(getString(R.string.token_error_message));*/
                 }
             }
         };
@@ -101,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements IRegistrationCont
         if (checkPlayServices()) {
             // Start IntentService to register this application with GCM.
             Intent intent = new Intent(this, SfrGcmRegistrationIntentService.class);
+
             startService(intent);
         }
 
@@ -279,7 +279,8 @@ public class MainActivity extends AppCompatActivity implements IRegistrationCont
                         changeFragment(position + 1);
                         break;
                     case 3:
-                        String message = sharedPreferences.getString("share_text", "");
+                        String message = sharedPreferences.getString("share_text",
+                                getString(R.string.pref_default_share_text));
 
                         showShareIntent(message);
                         break;
@@ -313,5 +314,34 @@ public class MainActivity extends AppCompatActivity implements IRegistrationCont
         textView.setTextColor(Color.YELLOW);
 
         snackbar.show();
+    }
+
+    @Override
+    public void showLoading() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                loadingView = KProgressHUD.create(MainActivity.this)
+                        .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                        .setLabel("Please wait")
+                        .setCancellable(true)
+                        .setAnimationSpeed(2)
+                        .setDimAmount(0.5f);
+
+                loadingView.show();
+            }
+        });
+    }
+
+    @Override
+    public void dismissLoading() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (loadingView != null) {
+                    loadingView.dismiss();
+                }
+            }
+        });
     }
 }

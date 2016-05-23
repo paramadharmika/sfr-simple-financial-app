@@ -1,13 +1,17 @@
 package com.ssudio.sfr.registration.presenter;
 
 import com.ssudio.sfr.authentication.LocalAuthenticationService;
+import com.ssudio.sfr.registration.event.APIGetUserCallProgressEvent;
+import com.ssudio.sfr.registration.event.APISaveProfileProgressEvent;
+import com.ssudio.sfr.network.event.NetworkConnectivityEvent;
 import com.ssudio.sfr.network.request.SFRGeneralPostParameter;
+import com.ssudio.sfr.network.ui.IConnectivityListenerView;
+import com.ssudio.sfr.network.ui.ILoadingView;
 import com.ssudio.sfr.registration.command.IGetProfileCommand;
 import com.ssudio.sfr.registration.command.IRegistrationCommand;
 import com.ssudio.sfr.registration.command.IUpdateProfileCommand;
 import com.ssudio.sfr.registration.event.ProfileEvent;
 import com.ssudio.sfr.registration.model.UserModel;
-import com.ssudio.sfr.storage.SettingsData;
 import com.ssudio.sfr.storage.SettingsLocalStorage;
 
 import org.greenrobot.eventbus.EventBus;
@@ -15,7 +19,6 @@ import org.greenrobot.eventbus.Subscribe;
 
 import javax.inject.Inject;
 
-//TODO: rename to be profile presenter
 public class RegistrationPresenter implements IRegistrationPresenter {
     @Inject
     protected SettingsLocalStorage settingsLocalStorage;
@@ -26,10 +29,16 @@ public class RegistrationPresenter implements IRegistrationPresenter {
     private IUpdateProfileCommand updateProfileCommand;
     private IGetProfileCommand getProfileCommand;
     private IRegistrationView view;
+    private final ILoadingView loadingView;
+    private final IConnectivityListenerView connectivityListenerView;
 
     @Inject
-    public RegistrationPresenter(IRegistrationView view) {
+    public RegistrationPresenter(IRegistrationView view,
+                                 IConnectivityListenerView connectivityListenerView,
+                                 ILoadingView loadingView) {
         this.view = view;
+        this.loadingView = loadingView;
+        this.connectivityListenerView = connectivityListenerView;
 
         EventBus.getDefault().register(this);
     }
@@ -44,7 +53,7 @@ public class RegistrationPresenter implements IRegistrationPresenter {
     }
 
     @Override
-    public void getUserModelAsync(String verificationCode) {
+    public void getUserModel(String verificationCode) {
         getProfileCommand.executeAsync(new SFRGeneralPostParameter(verificationCode));
     }
 
@@ -67,6 +76,21 @@ public class RegistrationPresenter implements IRegistrationPresenter {
         } else if (e.getEventType() == ProfileEvent.LOADED) {
             view.bindProfile(e);
         }
+    }
+
+    @Subscribe
+    public void onAPIGetUserCallProgressEvent(APIGetUserCallProgressEvent e) {
+        loadingView.showLoading();
+    }
+
+    @Subscribe
+    public void onAPISaveProfileProgressEvent (APISaveProfileProgressEvent e) {
+        loadingView.showLoading();
+    }
+
+    @Subscribe
+    public void onNetworkEvent(NetworkConnectivityEvent e) {
+        connectivityListenerView.showMessage(e);
     }
 
     public void setRegistrationCommand(IRegistrationCommand registrationCommand) {

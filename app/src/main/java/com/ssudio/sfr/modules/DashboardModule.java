@@ -7,9 +7,9 @@ import com.ssudio.sfr.dashboard.command.IDashboardCommand;
 import com.ssudio.sfr.dashboard.presenter.DashboardPresenter;
 import com.ssudio.sfr.dashboard.presenter.IDashboardPresenter;
 import com.ssudio.sfr.dashboard.presenter.IDashboardView;
+import com.ssudio.sfr.network.ui.ILoadingView;
+import com.ssudio.sfr.network.ui.IConnectivityListenerView;
 import com.ssudio.sfr.scope.UserScope;
-
-import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
@@ -18,15 +18,24 @@ import okhttp3.OkHttpClient;
 @Module
 public class DashboardModule {
     private IDashboardView view;
+    private IConnectivityListenerView networkListenerView;
+    private ILoadingView loadingView;
 
-    public DashboardModule(IDashboardView view) {
+    public DashboardModule(IDashboardView view,
+                           IConnectivityListenerView networkListenerView,
+                           ILoadingView loadingView) {
         this.view = view;
+        this.networkListenerView = networkListenerView;
+        this.loadingView = loadingView;
     }
 
     @UserScope
     @Provides
-    public IDashboardPresenter getPresenter(IDashboardView view, IDashboardCommand dashboardCommand) {
-        DashboardPresenter presenter = new DashboardPresenter(view);
+    public IDashboardPresenter getPresenter(IDashboardView view,
+                                            IConnectivityListenerView networkListenerView,
+                                            ILoadingView loadingView,
+                                            IDashboardCommand dashboardCommand) {
+        DashboardPresenter presenter = new DashboardPresenter(view, networkListenerView, loadingView);
 
         presenter.setDashboardCommand(dashboardCommand);
 
@@ -37,6 +46,18 @@ public class DashboardModule {
     @Provides
     public IDashboardView getDashboardView() {
         return this.view;
+    }
+
+    @UserScope
+    @Provides
+    public IConnectivityListenerView getNetworkListenerView() {
+        return this.networkListenerView;
+    }
+
+    @UserScope
+    @Provides
+    public ILoadingView getLoadingView() {
+        return this.loadingView;
     }
 
     @UserScope

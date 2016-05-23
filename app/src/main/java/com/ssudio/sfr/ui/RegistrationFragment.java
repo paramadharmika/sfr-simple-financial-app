@@ -1,6 +1,7 @@
 package com.ssudio.sfr.ui;
 
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,25 +10,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import com.kaopiz.kprogresshud.KProgressHUD;
 import com.ssudio.sfr.MainActivity;
 import com.ssudio.sfr.R;
 import com.ssudio.sfr.SFRApplication;
 import com.ssudio.sfr.authentication.LocalAuthenticationService;
-import com.ssudio.sfr.components.app.DaggerLocalStorageComponents;
-import com.ssudio.sfr.components.app.DaggerNetworkComponents;
-import com.ssudio.sfr.components.app.NetworkComponents;
 import com.ssudio.sfr.components.ui.BasePresenterComponent;
 import com.ssudio.sfr.components.ui.DaggerBasePresenterComponent;
-import com.ssudio.sfr.components.app.LocalStorageComponents;
 import com.ssudio.sfr.components.ui.RegistrationComponents;
 import com.ssudio.sfr.modules.LocalAuthenticationModule;
 import com.ssudio.sfr.modules.LocalStorageModule;
 import com.ssudio.sfr.modules.NetworkModule;
 import com.ssudio.sfr.modules.RegistrationModule;
+import com.ssudio.sfr.network.event.NetworkConnectivityEvent;
+import com.ssudio.sfr.network.ui.IConnectivityListenerView;
+import com.ssudio.sfr.network.ui.ILoadingView;
 import com.ssudio.sfr.registration.event.ProfileEvent;
 import com.ssudio.sfr.registration.model.UserModel;
-import com.ssudio.sfr.registration.presenter.IRegistrationContainerView;
 import com.ssudio.sfr.registration.presenter.IRegistrationView;
 import com.ssudio.sfr.registration.presenter.RegistrationPresenter;
 
@@ -37,7 +38,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class RegistrationFragment extends Fragment implements IRegistrationView {
+public class RegistrationFragment extends Fragment
+        implements IRegistrationView, IConnectivityListenerView, ILoadingView {
     @Inject
     LocalAuthenticationService localAuthService;
     @Inject
@@ -63,28 +65,6 @@ public class RegistrationFragment extends Fragment implements IRegistrationView 
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
-        LocalStorageComponents localStorageComponents = DaggerLocalStorageComponents.builder()
-                .sFRApplicationModule(((SFRApplication)getActivity().getApplication()).getSfrApplicationModule())
-                .localStorageModule(new LocalStorageModule())
-                .build();
-
-        NetworkComponents netComponents = DaggerNetworkComponents.builder()
-                /*.sFRApplicationModule(((SFRApplication)getActivity().getApplication()).getSfrApplicationModule())*/
-                .build();
-
-        /*components = DaggerRegistrationComponents.builder()
-                .localAuthenticationModule(new LocalAuthenticationModule(((SFRApplication)getActivity().getApplication()).getLocalStorage()))
-                .sFRApplicationModule(((SFRApplication)getActivity().getApplication()).getSfrApplicationModule())
-                .netModule(new NetModule())
-                .registrationModule(new RegistrationModule(this))
-                .build();*/
-
-        /*components = DaggerRegistrationComponents.builder()
-                *//*.localAuthenticationModule(new LocalAuthenticationModule(((SFRApplication)getActivity().getApplication()).getLocalStorage()))*//*
-                .networkComponents(netComponents)
-                .registrationModule(new RegistrationModule(this))
-                .build();*/
-
         BasePresenterComponent basePresenterComponent = DaggerBasePresenterComponent.builder()
                 .sFRApplicationModule(((SFRApplication)getActivity().getApplication()).getSfrApplicationModule())
                 .localStorageModule(new LocalStorageModule())
@@ -92,13 +72,11 @@ public class RegistrationFragment extends Fragment implements IRegistrationView 
                 .networkModule(new NetworkModule())
                 .build();
 
-        components = basePresenterComponent.newRegistrationSubComponent(new RegistrationModule(this));
+        components = basePresenterComponent.newRegistrationSubComponent(new RegistrationModule(this, this, this));
 
         components.inject(this);
 
         basePresenterComponent.inject(registrationPresenter);
-
-        /*localStorageComponents.inject(registrationPresenter);*/
 
         View v = inflater.inflate(R.layout.fragment_registration, container, false);
 
@@ -111,7 +89,7 @@ public class RegistrationFragment extends Fragment implements IRegistrationView 
 
     private void setupViews() {
         if (localAuthService.isValidUser()) {
-            registrationPresenter.getUserModelAsync(localAuthService.getLocalVerificationCode());
+            registrationPresenter.getUserModel(localAuthService.getLocalVerificationCode());
         }
     }
 
@@ -136,8 +114,8 @@ public class RegistrationFragment extends Fragment implements IRegistrationView 
     }
 
     @Override
-    public IRegistrationContainerView getUpperHandler() {
-        return (IRegistrationContainerView) getActivity();
+    public IContainerViewCallback getParentView() {
+        return (IContainerViewCallback) getActivity();
     }
 
     @Override
@@ -157,8 +135,10 @@ public class RegistrationFragment extends Fragment implements IRegistrationView 
             txtVerificationCode.setText(e.getModel().getVerificationCode());
             txtVerificationCode.setEnabled(false);
         } else {
-            getUpperHandler().showMessage(e.getIsSuccess(), e.getMessage());
+            getParentView().showMessage(e.getIsSuccess(), e.getMessage());
         }
+
+        dismissLoading();
     }
 
     @Override
@@ -170,13 +150,47 @@ public class RegistrationFragment extends Fragment implements IRegistrationView 
 
             getActivity().finish();
         } else {
-            getUpperHandler().showMessage(e.getIsSuccess(), e.getMessage());
+            getParentView().showMessage(e.getIsSuccess(), e.getMessage());
+
+            dismissLoading();
         }
     }
 
     @Override
     public void showUpdatedRegistrationCallback(ProfileEvent e) {
-        getUpperHandler().showMessage(e.getIsSuccess(), e.getMessage());
+        getParentView().showMessage(e.getIsSuccess(), e.getMessage());
+
+        dismissLoading();
+    }
+
+    @Override
+    public void showMessage(final NetworkConnectivityEvent e) {
+        final Activity activity = getActivity();
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String message;
+
+                if (e.isConnected()) {
+                    message = getString(R.string.message_network_connected);
+                } else {
+                    message = getString(R.string.message_network_is_not_connected);
+                }
+
+                Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    public void showLoading() {
+        getParentView().showLoading();
+    }
+
+    @Override
+    public void dismissLoading() {
+        getParentView().dismissLoading();
     }
 
     @Override

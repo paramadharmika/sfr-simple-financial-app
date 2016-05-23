@@ -8,14 +8,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
-import com.ssudio.sfr.registration.presenter.IRegistrationContainerView;
+import com.kaopiz.kprogresshud.KProgressHUD;
+import com.ssudio.sfr.ui.IContainerViewCallback;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class RegistrationActivity extends AppCompatActivity implements IRegistrationContainerView {
+public class RegistrationActivity extends AppCompatActivity implements IContainerViewCallback {
     @BindView(R.id.coordinatorLayout)
     protected CoordinatorLayout coordinatorLayout;
+    private KProgressHUD loadingView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,5 +49,24 @@ public class RegistrationActivity extends AppCompatActivity implements IRegistra
         textView.setTextColor(Color.YELLOW);
 
         snackbar.show();
+    }
+
+    @Override
+    public void showLoading() {
+        loadingView = KProgressHUD.create(this)
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setLabel("Please wait")
+                .setCancellable(true)
+                .setAnimationSpeed(2)
+                .setDimAmount(0.5f);
+
+        loadingView.show();
+    }
+
+    @Override
+    public void dismissLoading() {
+        if (loadingView != null) {
+            loadingView.dismiss();
+        }
     }
 }

@@ -3,8 +3,8 @@ package com.ssudio.sfr.report.command;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.ssudio.sfr.configuration.IAppConfiguration;
-import com.ssudio.sfr.dashboard.events.DashboardEvent;
-import com.ssudio.sfr.dashboard.model.DashboardFeedModel;
+import com.ssudio.sfr.report.event.APIGetReportProgressEvent;
+import com.ssudio.sfr.network.event.NetworkConnectivityEvent;
 import com.ssudio.sfr.network.response.SFRApiGetResponse;
 import com.ssudio.sfr.report.event.ReportEvent;
 import com.ssudio.sfr.report.model.ReportRequestModel;
@@ -49,12 +49,7 @@ public class ReportCommand implements IReportCommand {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                //todo: post network io exception to main view
-//                if (isNewUser) {
-//                    EventBus.getDefault().post(new RegistrationEvent(false, e.getMessage(), null));
-//                } else {
-//                    EventBus.getDefault().post(new UpdateRegistrationEvent(false, e.getMessage(), null));
-//                }
+                EventBus.getDefault().post(new NetworkConnectivityEvent(false));
             }
 
             @Override
@@ -75,5 +70,7 @@ public class ReportCommand implements IReportCommand {
                 EventBus.getDefault().post(event);
             }
         });
+
+        EventBus.getDefault().post(new APIGetReportProgressEvent(true));
     }
 }

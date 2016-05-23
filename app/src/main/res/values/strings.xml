@@ -80,4 +80,8 @@
     <string name="profile_title">Profile</string>
     <string name="report_title">Report</string>
     <string name="share_title">Share</string>
+    <string name="message_report_not_found">Report not found on selected date filter</string>
+    <string name="total_amount">"Jumlah total: "</string>
+    <string name="message_network_connected">Network connected</string>
+    <string name="message_network_is_not_connected">Network is not connected</string>
 </resources>

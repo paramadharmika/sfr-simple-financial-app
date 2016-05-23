@@ -1,6 +1,7 @@
 package com.ssudio.sfr.ui;
 
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -8,12 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import com.kaopiz.kprogresshud.KProgressHUD;
 import com.ssudio.sfr.R;
 import com.ssudio.sfr.SFRApplication;
 
-import com.ssudio.sfr.components.app.DaggerLocalStorageComponents;
-/*import com.ssudio.sfr.components.ui.DaggerDashboardComponents;*/
 import com.ssudio.sfr.components.ui.BasePresenterComponent;
 import com.ssudio.sfr.components.ui.DaggerBasePresenterComponent;
 import com.ssudio.sfr.components.ui.DashboardComponents;
@@ -25,6 +26,9 @@ import com.ssudio.sfr.modules.DashboardModule;
 import com.ssudio.sfr.modules.LocalAuthenticationModule;
 import com.ssudio.sfr.modules.LocalStorageModule;
 import com.ssudio.sfr.modules.NetworkModule;
+import com.ssudio.sfr.network.ui.ILoadingView;
+import com.ssudio.sfr.network.ui.IConnectivityListenerView;
+import com.ssudio.sfr.network.event.NetworkConnectivityEvent;
 
 import java.util.ArrayList;
 
@@ -36,7 +40,9 @@ import butterknife.ButterKnife;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class DashboardFragment extends Fragment implements IDashboardView {
+public class DashboardFragment extends Fragment
+        implements IDashboardView, IConnectivityListenerView, ILoadingView {
+
     @Inject
     protected IDashboardPresenter presenter;
 
@@ -67,13 +73,6 @@ public class DashboardFragment extends Fragment implements IDashboardView {
             }
         });
 
-        /*DashboardComponents components = DaggerDashboardComponents.builder()
-                .sFRApplicationModule(((SFRApplication)getActivity().getApplication()).getSfrApplicationModule())
-                .dashboardModule(new DashboardModule(this))
-                .build();
-
-        components.inject(this);*/
-
         BasePresenterComponent basePresenterComponent = DaggerBasePresenterComponent.builder()
                 .sFRApplicationModule(((SFRApplication)getActivity().getApplication()).getSfrApplicationModule())
                 .localStorageModule(new LocalStorageModule())
@@ -81,7 +80,7 @@ public class DashboardFragment extends Fragment implements IDashboardView {
                 .networkModule(new NetworkModule())
                 .build();
 
-        components = basePresenterComponent.newDashboardSubComponent(new DashboardModule(this));
+        components = basePresenterComponent.newDashboardSubComponent(new DashboardModule(this, this, this));
 
         components.inject(this);
 
@@ -101,8 +100,59 @@ public class DashboardFragment extends Fragment implements IDashboardView {
                         getActivity().getBaseContext(), result);
 
                 lstFeed.setAdapter(adapter);
+
+                dismissLoading();
             }
         });
+    }
+
+    @Override
+    public void showMessage(final NetworkConnectivityEvent e) {
+        final Activity activity = getActivity();
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String message;
+
+                if (e.isConnected()) {
+                    message = getString(R.string.message_network_connected);
+                } else {
+                    message = getString(R.string.message_network_is_not_connected);
+                }
+
+                Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    public void showLoading() {
+        getParentView().showLoading();
+        /*loadingView = KProgressHUD.create(getActivity())
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setLabel("Please wait")
+                .setCancellable(true)
+                .setAnimationSpeed(2)
+                .setDimAmount(0.5f);
+
+        loadingView.show();*/
+
+
+    }
+
+    @Override
+    public void dismissLoading() {
+        /*if (loadingView != null) {
+            loadingView.dismiss();
+        }*/
+
+        getParentView().dismissLoading();
+    }
+
+    @Override
+    public IContainerViewCallback getParentView() {
+        return (IContainerViewCallback)getActivity();
     }
 
     @Override

@@ -2,6 +2,8 @@ package com.ssudio.sfr.registration.command;
 
 import com.google.gson.Gson;
 import com.ssudio.sfr.configuration.IAppConfiguration;
+import com.ssudio.sfr.registration.event.APISaveProfileProgressEvent;
+import com.ssudio.sfr.network.event.NetworkConnectivityEvent;
 import com.ssudio.sfr.network.request.SFRNetworkRequestType;
 import com.ssudio.sfr.network.response.SFRApiPostResponse;
 import com.ssudio.sfr.registration.event.ProfileEvent;
@@ -48,12 +50,7 @@ public class UpdateProfileCommand implements IUpdateProfileCommand {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                //todo: post network io exception to main view
-//                if (isNewUser) {
-//                    EventBus.getDefault().post(new RegistrationEvent(false, e.getMessage(), null));
-//                } else {
-//                    EventBus.getDefault().post(new UpdateRegistrationEvent(false, e.getMessage(), null));
-//                }
+                EventBus.getDefault().post(new NetworkConnectivityEvent(false));
             }
 
             @Override
@@ -73,5 +70,7 @@ public class UpdateProfileCommand implements IUpdateProfileCommand {
                 EventBus.getDefault().post(profileEvent);
             }
         });
+
+        EventBus.getDefault().post(new APISaveProfileProgressEvent(true));
     }
 }

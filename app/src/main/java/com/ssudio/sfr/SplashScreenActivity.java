@@ -7,24 +7,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.ssudio.sfr.authentication.LocalAuthenticationService;
-import com.ssudio.sfr.components.app.DaggerLocalAuthenticationComponent;
-import com.ssudio.sfr.components.app.DaggerLocalStorageComponents;
-import com.ssudio.sfr.components.app.DaggerNetworkComponents;
-import com.ssudio.sfr.components.app.NetworkComponents;
-/*import com.ssudio.sfr.components.ui.DaggerSplashScreenComponent;*/
-/*import com.ssudio.sfr.components.ui.SplashScreenComponent;*/
 import com.ssudio.sfr.components.ui.BasePresenterComponent;
 import com.ssudio.sfr.components.ui.DaggerBasePresenterComponent;
-/*import com.ssudio.sfr.components.ui.DaggerSplashScreenComponent;*/
 import com.ssudio.sfr.components.ui.SplashScreenComponent;
 import com.ssudio.sfr.modules.LocalAuthenticationModule;
 import com.ssudio.sfr.modules.LocalStorageModule;
 import com.ssudio.sfr.modules.NetworkModule;
 import com.ssudio.sfr.modules.SplashScreenModule;
+import com.ssudio.sfr.network.ui.IConnectivityListenerView;
+import com.ssudio.sfr.network.event.NetworkConnectivityEvent;
 import com.ssudio.sfr.splashscreen.model.SplashScreenModel;
 import com.ssudio.sfr.splashscreen.presenter.ISplashScreenView;
 import com.ssudio.sfr.splashscreen.presenter.SplashScreenPresenter;
@@ -34,7 +30,8 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class SplashScreenActivity extends AppCompatActivity implements ISplashScreenView {
+public class SplashScreenActivity extends AppCompatActivity
+        implements ISplashScreenView, IConnectivityListenerView {
     @Inject
     protected LocalAuthenticationService localAuthService;
     @Inject
@@ -56,19 +53,6 @@ public class SplashScreenActivity extends AppCompatActivity implements ISplashSc
 
         ButterKnife.bind(this);
 
-
-
-        /*DaggerLocalAuthenticationComponent.builder()
-                .sFRApplicationModule(((SFRApplication)getApplication()).getSfrApplicationModule())
-                .localStorageModule(new LocalStorageModule())
-                .localAuthenticationModule(new LocalAuthenticationModule())
-                .build();*/
-
-        NetworkComponents netComponents = DaggerNetworkComponents.builder()
-                /*.sFRApplicationModule(((SFRApplication)getApplication()).getSfrApplicationModule())*/
-                .build();
-
-
         BasePresenterComponent basePresenterComponent = DaggerBasePresenterComponent.builder()
                 .sFRApplicationModule(((SFRApplication)getApplication()).getSfrApplicationModule())
                 .localStorageModule(new LocalStorageModule())
@@ -76,19 +60,7 @@ public class SplashScreenActivity extends AppCompatActivity implements ISplashSc
                 .networkModule(new NetworkModule())
                 .build();
 
-        components = basePresenterComponent.newSplashScreenSubComponent(new SplashScreenModule(this));
-
-        /*components = DaggerSplashScreenComponent.builder()
-                .networkComponents(netComponents)
-                *//*.localAuthenticationModule(new LocalAuthenticationModule(((SFRApplication)getApplication()).getLocalStorage()))*//*
-                .splashScreenModule(new SplashScreenModule(this))
-                .build();*/
-
-                /*.sFRApplicationModule(((SFRApplication)getApplication()).getSfrApplicationModule())
-                .localAuthenticationModule(new LocalAuthenticationModule())
-                .netModule(new NetModule())
-                .splashScreenModule(new SplashScreenModule(this))
-                .build();*/
+        components = basePresenterComponent.newSplashScreenSubComponent(new SplashScreenModule(this, this));
 
         components.inject(this);
 
@@ -120,19 +92,20 @@ public class SplashScreenActivity extends AppCompatActivity implements ISplashSc
                         }
 
                         finish();
-//                        Handler handler = new Handler();
-//                        handler.postDelayed(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                if (localAuthService.isValidUser()) {
-//                                    startActivity(new Intent(SplashScreenActivity.this, MainActivity.class));
-//                                } else {
-//                                    startActivity(new Intent(SplashScreenActivity.this, RegistrationActivity.class));
-//                                }
-//
-//                                finish();
-//                            }
-//                        }, timeToPause);
+
+                        /*Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (localAuthService.isValidUser()) {
+                                    startActivity(new Intent(SplashScreenActivity.this, MainActivity.class));
+                                } else {
+                                    startActivity(new Intent(SplashScreenActivity.this, RegistrationActivity.class));
+                                }
+
+                                finish();
+                            }
+                        }, timeToPause);*/
                     }
                 });
     }
@@ -142,5 +115,23 @@ public class SplashScreenActivity extends AppCompatActivity implements ISplashSc
         splashScreenPresenter.unregisterEventHandler();
 
         super.onDestroy();
+    }
+
+    @Override
+    public void showMessage(final NetworkConnectivityEvent e) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String message;
+
+                if (e.isConnected()) {
+                    message = getString(R.string.message_network_connected);
+                } else {
+                    message = getString(R.string.message_network_is_not_connected);
+                }
+
+                Toast.makeText(SplashScreenActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

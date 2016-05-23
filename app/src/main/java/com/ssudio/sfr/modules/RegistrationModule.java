@@ -2,6 +2,8 @@ package com.ssudio.sfr.modules;
 
 import com.google.gson.Gson;
 import com.ssudio.sfr.configuration.IAppConfiguration;
+import com.ssudio.sfr.network.ui.IConnectivityListenerView;
+import com.ssudio.sfr.network.ui.ILoadingView;
 import com.ssudio.sfr.registration.command.GetProfileCommand;
 import com.ssudio.sfr.registration.command.IGetProfileCommand;
 import com.ssudio.sfr.registration.command.IRegistrationCommand;
@@ -23,19 +25,28 @@ import okhttp3.OkHttpClient;
 @Module
 public class RegistrationModule {
     private IRegistrationView view;
+    private final ILoadingView loadingView;
+    private final IConnectivityListenerView connectivityListenerView;
 
-    public RegistrationModule(IRegistrationView view) {
+    public RegistrationModule(IRegistrationView view,
+                              IConnectivityListenerView connectivityListenerView,
+                              ILoadingView loadingView) {
         this.view = view;
+        this.connectivityListenerView = connectivityListenerView;
+        this.loadingView = loadingView;
     }
 
     @Provides
     @UserScope
     public RegistrationPresenter getPresenter(IRegistrationView view,
+                                              IConnectivityListenerView connectivityListenerView,
+                                              ILoadingView loadingView,
                                               IRegistrationCommand registrationCommand,
                                               IUpdateProfileCommand updateProfileCommand,
                                               IGetProfileCommand getProfileCommand
                                               ) {
-        RegistrationPresenter presenter = new RegistrationPresenter(view);
+
+        RegistrationPresenter presenter = new RegistrationPresenter(view, connectivityListenerView, loadingView);
 
         presenter.setRegistrationCommand(registrationCommand);
         presenter.setUpdateProfileCommand(updateProfileCommand);
@@ -48,6 +59,18 @@ public class RegistrationModule {
     @UserScope
     public IRegistrationView getRegistrationView() {
         return this.view;
+    }
+
+    @Provides
+    @UserScope
+    public IConnectivityListenerView getConnectivityListenerView() {
+        return this.connectivityListenerView;
+    }
+
+    @Provides
+    @UserScope
+    public ILoadingView getLoadingView() {
+        return this.loadingView;
     }
 
     @Provides

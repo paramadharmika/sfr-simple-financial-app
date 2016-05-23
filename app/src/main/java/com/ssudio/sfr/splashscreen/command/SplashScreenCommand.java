@@ -3,6 +3,7 @@ package com.ssudio.sfr.splashscreen.command;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.ssudio.sfr.configuration.IAppConfiguration;
+import com.ssudio.sfr.network.event.NetworkConnectivityEvent;
 import com.ssudio.sfr.network.response.SFRApiGetResponse;
 import com.ssudio.sfr.splashscreen.event.SplashScreenEvent;
 import com.ssudio.sfr.splashscreen.model.SplashScreenModel;
@@ -48,6 +49,8 @@ public class SplashScreenCommand implements ISplashScreenCommand {
 //                } else {
 //                    EventBus.getDefault().post(new UpdateRegistrationEvent(false, e.getMessage(), null));
 //                }
+
+                EventBus.getDefault().post(new NetworkConnectivityEvent(false));
             }
 
             @Override
