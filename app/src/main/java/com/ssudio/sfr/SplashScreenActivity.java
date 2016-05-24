@@ -3,6 +3,7 @@ package com.ssudio.sfr;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
@@ -85,15 +86,18 @@ public class SplashScreenActivity extends AppCompatActivity
                 new SimpleImageLoadingListener() {
                     @Override
                     public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                        if (localAuthService.isValidUser()) {
+                        /*if (localAuthService.isValidUser()) {
                             startActivity(new Intent(SplashScreenActivity.this, MainActivity.class));
                         } else {
                             startActivity(new Intent(SplashScreenActivity.this, RegistrationActivity.class));
                         }
 
-                        finish();
+                        finish();*/
 
-                        /*Handler handler = new Handler();
+                        int delayTime = 2000;
+
+                        Handler handler = new Handler();
+
                         handler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -105,7 +109,7 @@ public class SplashScreenActivity extends AppCompatActivity
 
                                 finish();
                             }
-                        }, timeToPause);*/
+                        }, delayTime);
                     }
                 });
     }
