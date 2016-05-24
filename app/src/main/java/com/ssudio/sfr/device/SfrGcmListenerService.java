@@ -68,7 +68,7 @@ public class SfrGcmListenerService extends GcmListenerService {
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                /*.setSmallIcon(R.drawable.ic_stat_ic_notification)*/
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(getResources().getString(R.string.app_name))
                 .setContentText(message)
                 .setAutoCancel(true)
