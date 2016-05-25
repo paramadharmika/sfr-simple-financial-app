@@ -42,14 +42,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity implements IContainerViewCallback {
-    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    private static final String TAG = "MainActivity";
     private static final String FRAGMENT_TAG = "main_container";
-
-    private BroadcastReceiver mRegistrationBroadcastReceiver;
-    private ProgressBar mRegistrationProgressBar;
-    private TextView mInformationTextView;
-    private boolean isReceiverRegistered;
 
     private DashboardFragment dashboardFragment;
     private ReportFragment reportFragment;
@@ -76,34 +69,6 @@ public class MainActivity extends AppCompatActivity implements IContainerViewCal
 
         localStorageComponents.inject(this);
 
-        //below is the google cloud messaging registration process
-        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                /*SharedPreferences sharedPreferences =
-                        PreferenceManager.getDefaultSharedPreferences(context);*/
-
-                boolean sentToken = sharedPreferences
-                        .getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
-
-                if (sentToken) {
-                    Toast.makeText(context, "token send", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(context, "token error", Toast.LENGTH_SHORT).show();
-                }
-            }
-        };
-
-        // Registering BroadcastReceiver
-        registerReceiver();
-
-        if (checkPlayServices()) {
-            // Start IntentService to register this application with GCM.
-            Intent intent = new Intent(this, SfrGcmRegistrationIntentService.class);
-
-            startService(intent);
-        }
-
         setupBottomBar();
 
         changeFragment(1);
@@ -112,44 +77,11 @@ public class MainActivity extends AppCompatActivity implements IContainerViewCal
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver();
     }
 
     @Override
     protected void onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
-        isReceiverRegistered = false;
         super.onPause();
-    }
-
-    private void registerReceiver(){
-        if(!isReceiverRegistered) {
-            LocalBroadcastManager.getInstance(this)
-                    .registerReceiver(mRegistrationBroadcastReceiver,
-                            new IntentFilter(QuickstartPreferences.REGISTRATION_COMPLETE));
-
-            isReceiverRegistered = true;
-        }
-    }
-    /**
-     * Check the device to make sure it has the Google Play Services APK. If
-     * it doesn't, display a dialog that allows users to download the APK from
-     * the Google Play Store or enable it in the device's system settings.
-     */
-    private boolean checkPlayServices() {
-        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (apiAvailability.isUserResolvableError(resultCode)) {
-                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
-                        .show();
-            } else {
-                Log.i(TAG, "This device is not supported.");
-                finish();
-            }
-            return false;
-        }
-        return true;
     }
 
     private void changeFragment(int fragmentType) {

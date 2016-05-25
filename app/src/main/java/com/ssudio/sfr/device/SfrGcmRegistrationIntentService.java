@@ -42,6 +42,9 @@ public class SfrGcmRegistrationIntentService extends IntentService {
             // TODO: Implement this method to send any registration to your app's servers.
             sendRegistrationToServer(token);
 
+            // store device registration to shared preferences
+            sharedPreferences.edit().putString(QuickstartPreferences.DEVICE_REGISTRATION_TOKEN, token).apply();
+
             // Subscribe to topic channels
             subscribeTopics(token);
 

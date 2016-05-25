@@ -1,6 +1,5 @@
 package com.ssudio.sfr.ui;
 
-
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
@@ -11,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.kaopiz.kprogresshud.KProgressHUD;
 import com.ssudio.sfr.R;
 import com.ssudio.sfr.SFRApplication;
 
@@ -56,7 +54,6 @@ public class DashboardFragment extends Fragment
     public DashboardFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -129,24 +126,10 @@ public class DashboardFragment extends Fragment
     @Override
     public void showLoading() {
         getParentView().showLoading();
-        /*loadingView = KProgressHUD.create(getActivity())
-                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
-                .setLabel("Please wait")
-                .setCancellable(true)
-                .setAnimationSpeed(2)
-                .setDimAmount(0.5f);
-
-        loadingView.show();*/
-
-
     }
 
     @Override
     public void dismissLoading() {
-        /*if (loadingView != null) {
-            loadingView.dismiss();
-        }*/
-
         getParentView().dismissLoading();
     }
 

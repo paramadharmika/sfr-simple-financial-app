@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 
 import com.ssudio.sfr.MainActivity;
 import com.ssudio.sfr.SFRApplication;
+import com.ssudio.sfr.SplashScreenActivity;
 import com.ssudio.sfr.modules.LocalStorageModule;
 import com.ssudio.sfr.modules.SFRApplicationModule;
 import com.ssudio.sfr.storage.SettingsLocalStorage;
@@ -19,4 +20,5 @@ public interface LocalStorageComponents {
     SharedPreferences provideSharedPreferences();
 
     void inject(MainActivity mainActivity);
+    /*void inject(SplashScreenActivity mainActivity);*/
 }

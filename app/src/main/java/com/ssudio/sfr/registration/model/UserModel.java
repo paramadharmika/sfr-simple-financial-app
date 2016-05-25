@@ -11,6 +11,8 @@ public class UserModel implements Serializable {
     private String phoneNumber;
     @SerializedName("verification_code")
     private final String verificationCode;
+    @SerializedName("client_id")
+    private String deviceRegistrationId;
 
     @SerializedName("id_member")
     private int id;
@@ -23,11 +25,12 @@ public class UserModel implements Serializable {
     @SerializedName("join_date")
     private String joinDate;
 
-    public UserModel(String name, String phoneNumber, String verificationCode) {
+    public UserModel(String name, String phoneNumber, String verificationCode, String deviceRegistrationId) {
         this.id = 0;
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.verificationCode = verificationCode;
+        this.deviceRegistrationId = deviceRegistrationId;
     }
 
     public String getName() {
@@ -89,4 +92,12 @@ public class UserModel implements Serializable {
     public void setJoinDate(String joinDate) {
         this.joinDate = joinDate;
     }
+
+    public String getDeviceRegistrationId() {
+        return deviceRegistrationId;
+    }
+
+    /*public void setDeviceRegistrationId(String deviceRegistrationId) {
+        this.deviceRegistrationId = deviceRegistrationId;
+    }*/
 }

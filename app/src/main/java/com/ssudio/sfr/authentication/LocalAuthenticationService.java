@@ -31,13 +31,13 @@ public class LocalAuthenticationService {
         SettingsData settingsData = settingsLocalStorage.getSettingsData();
 
         if (settingsData == null) {
-            return new UserModel("", "", "");
+            return new UserModel("", "", "", "");
         }
 
         UserModel user = settingsData.getUser();
 
         if (user == null) {
-            return new UserModel("", "", "");
+            return new UserModel("", "", "", "");
         }
 
         return user;

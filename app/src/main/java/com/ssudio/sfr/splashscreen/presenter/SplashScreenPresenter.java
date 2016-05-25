@@ -17,7 +17,7 @@ public class SplashScreenPresenter implements ISplashScreenPresenter {
 
     @Inject
     public SplashScreenPresenter(ISplashScreenView view,
-                                 IConnectivityListenerView networkListenerView) {
+                                 IConnectivityListenerView connectivityListenerView) {
         this.view = view;
         this.connectivityListenerView = connectivityListenerView;
 

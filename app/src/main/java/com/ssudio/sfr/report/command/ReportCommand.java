@@ -57,7 +57,7 @@ public class ReportCommand implements IReportCommand {
                 String result = response.body().string();
 
                 SFRApiGetResponse<ReportResponseModel> apiResponse = gson.fromJson(result,
-                        new TypeToken<SFRApiGetResponse<ArrayList<ReportResponseModel>>>(){}.getType());
+                        new TypeToken<SFRApiGetResponse<ReportResponseModel>>(){}.getType());
 
                 ReportEvent event;
 

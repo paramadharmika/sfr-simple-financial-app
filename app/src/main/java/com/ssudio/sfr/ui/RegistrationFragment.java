@@ -4,6 +4,7 @@ package com.ssudio.sfr.ui;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.ssudio.sfr.authentication.LocalAuthenticationService;
 import com.ssudio.sfr.components.ui.BasePresenterComponent;
 import com.ssudio.sfr.components.ui.DaggerBasePresenterComponent;
 import com.ssudio.sfr.components.ui.RegistrationComponents;
+import com.ssudio.sfr.device.QuickstartPreferences;
 import com.ssudio.sfr.modules.LocalAuthenticationModule;
 import com.ssudio.sfr.modules.LocalStorageModule;
 import com.ssudio.sfr.modules.NetworkModule;
@@ -42,6 +44,8 @@ public class RegistrationFragment extends Fragment
         implements IRegistrationView, IConnectivityListenerView, ILoadingView {
     @Inject
     LocalAuthenticationService localAuthService;
+    @Inject
+    SharedPreferences sharedPreferences;
     @Inject
     RegistrationPresenter registrationPresenter;
 
@@ -107,7 +111,8 @@ public class RegistrationFragment extends Fragment
         } else {
             model = new UserModel(txtName.getText().toString(),
                     txtPhone.getText().toString(),
-                    txtVerificationCode.getText().toString());
+                    txtVerificationCode.getText().toString(),
+                    sharedPreferences.getString(QuickstartPreferences.DEVICE_REGISTRATION_TOKEN, ""));
 
             registrationPresenter.register(model);
         }

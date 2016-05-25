@@ -15,7 +15,6 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.kaopiz.kprogresshud.KProgressHUD;
 import com.ssudio.sfr.R;
 import com.ssudio.sfr.SFRApplication;
 
@@ -170,7 +169,7 @@ public class ReportFragment extends Fragment implements IReportView, IConnectivi
 
         String dateStart = df.format(startPeriod);
         String dateEnd = df.format(endPeriod);
-        String verificationCode = localAuthService.getLocalVerificationCode();
+        String verificationCode = "4567123" /*localAuthService.getLocalVerificationCode()*/;
 
         ReportRequestModel model = new ReportRequestModel(dateStart, dateEnd, verificationCode);
 
@@ -288,14 +287,6 @@ public class ReportFragment extends Fragment implements IReportView, IConnectivi
     @Override
     public void showLoading() {
         getParentView().showLoading();
-        /*loadingView = KProgressHUD.create(getActivity())
-                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
-                .setLabel("Please wait")
-                .setCancellable(true)
-                .setAnimationSpeed(2)
-                .setDimAmount(0.5f);
-
-        loadingView.show();*/
     }
 
     @Override

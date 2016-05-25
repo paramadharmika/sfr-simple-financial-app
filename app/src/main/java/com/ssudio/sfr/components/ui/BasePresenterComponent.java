@@ -1,5 +1,6 @@
 package com.ssudio.sfr.components.ui;
 
+import com.ssudio.sfr.SplashScreenActivity;
 import com.ssudio.sfr.modules.DashboardModule;
 import com.ssudio.sfr.modules.LocalAuthenticationModule;
 import com.ssudio.sfr.modules.LocalStorageModule;
