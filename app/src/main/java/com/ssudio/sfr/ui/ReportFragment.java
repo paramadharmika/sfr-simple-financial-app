@@ -3,6 +3,7 @@ package com.ssudio.sfr.ui;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.view.LayoutInflater;
@@ -15,6 +16,9 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mobsandgeeks.saripaar.Rule;
+import com.mobsandgeeks.saripaar.Validator;
+import com.mobsandgeeks.saripaar.annotation.Required;
 import com.ssudio.sfr.R;
 import com.ssudio.sfr.SFRApplication;
 
@@ -35,6 +39,7 @@ import com.ssudio.sfr.report.presenter.IReportView;
 import com.ssudio.sfr.report.presenter.ReportPresenter;
 import com.ssudio.sfr.utility.DateUtility;
 
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -49,17 +54,22 @@ import butterknife.OnClick;
 
 /**
  * A simple {@link Fragment} subclass.
+ * TODO: create custom validator
+ *  http://www.bernie-eng.com/blog/2015/03/25/validation-with-android-saripaar/
  */
-public class ReportFragment extends Fragment implements IReportView, IConnectivityListenerView, ILoadingView {
+public class ReportFragment extends Fragment
+        implements IReportView, IConnectivityListenerView, ILoadingView, Validator.ValidationListener {
     @Inject
     LocalAuthenticationService localAuthService;
     @Inject
     ReportPresenter reportPresenter;
 
 
+    @Required(order = 1)
     @BindView(R.id.txtStartDate)
     protected EditText txtStartDate;
 
+    @Required(order = 2)
     @BindView(R.id.txtEndDate)
     protected EditText txtEndDate;
 
@@ -68,6 +78,8 @@ public class ReportFragment extends Fragment implements IReportView, IConnectivi
 
     @BindView(R.id.txtTotal)
     protected TextView txtTotal;
+
+    private Validator userDetailsValidator;
 
     private DatePickerDialog fromDatePickerDialog;
     private DatePickerDialog toDatePickerDialog;
@@ -118,7 +130,35 @@ public class ReportFragment extends Fragment implements IReportView, IConnectivi
             }
         });
 
+        disableSofInputOnFocus(txtStartDate);
+        disableSofInputOnFocus(txtEndDate);
+
+        setupValidators();
+
         return v;
+    }
+
+    private void disableSofInputOnFocus(EditText editText) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            editText.setShowSoftInputOnFocus(false);
+        } else {
+            try {
+                final Method method = EditText.class.getMethod("setShowSoftInputOnFocus",
+                        new Class[]{boolean.class});
+
+                method.setAccessible(true);
+                method.invoke(editText, false);
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+    }
+
+    private void setupValidators() {
+        userDetailsValidator = new Validator(this);
+
+        //'this' class implements ValidationListener
+        userDetailsValidator.setValidationListener(this);
     }
 
     protected void showDateDialogForStartPeriode() {
@@ -165,15 +205,7 @@ public class ReportFragment extends Fragment implements IReportView, IConnectivi
 
     @OnClick(R.id.btnSubmit)
     protected void btnSubmit_Click() {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-
-        String dateStart = df.format(startPeriod);
-        String dateEnd = df.format(endPeriod);
-        String verificationCode = "4567123" /*localAuthService.getLocalVerificationCode()*/;
-
-        ReportRequestModel model = new ReportRequestModel(dateStart, dateEnd, verificationCode);
-
-        reportPresenter.getReport(model);
+        userDetailsValidator.validate();
     }
 
     @Override
@@ -227,7 +259,7 @@ public class ReportFragment extends Fragment implements IReportView, IConnectivi
 
             TextView lblNo = new TextView(getActivity());
             lblNo.setId(id++);
-            lblNo.setText(String.valueOf(i));
+            lblNo.setText(String.valueOf(i + 1));
             lblNo.setPadding(2, 0, 5, 0);
             /*lblNo.setTextColor(Color.WHITE);*/
             tr.addView(lblNo);
@@ -292,6 +324,37 @@ public class ReportFragment extends Fragment implements IReportView, IConnectivi
     @Override
     public void dismissLoading() {
         getParentView().dismissLoading();
+    }
+
+    @Override
+    public void onValidationSucceeded() {
+        clearErrorMessageOnEditText();
+
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+
+        String dateStart = df.format(startPeriod);
+        String dateEnd = df.format(endPeriod);
+        String verificationCode = localAuthService.getLocalVerificationCode();
+
+        ReportRequestModel model = new ReportRequestModel(dateStart, dateEnd, verificationCode);
+
+        reportPresenter.getReport(model);
+    }
+
+    private void clearErrorMessageOnEditText() {
+        txtEndDate.setError(null);
+        txtStartDate.setError(null);
+    }
+
+    @Override
+    public void onValidationFailed(View failedView, Rule<?> failedRule) {
+        String failureMessage = failedRule.getFailureMessage();
+
+        failedView.requestFocus();
+
+        if (failedView instanceof EditText) {
+            ((EditText)failedView).setError(failureMessage);
+        }
     }
 
     @Override

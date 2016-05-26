@@ -43,4 +43,5 @@ dependencies {
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     compile 'com.aurelhubert:ahbottomnavigation:1.2.0'
     compile 'com.kaopiz:kprogresshud:1.0.5'
+    compile 'com.mobsandgeeks:android-saripaar:1.0.3'
 }

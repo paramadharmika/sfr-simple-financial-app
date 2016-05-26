@@ -13,7 +13,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.kaopiz.kprogresshud.KProgressHUD;
+import com.mobsandgeeks.saripaar.Rule;
+import com.mobsandgeeks.saripaar.Validator;
+import com.mobsandgeeks.saripaar.annotation.Required;
 import com.ssudio.sfr.MainActivity;
 import com.ssudio.sfr.R;
 import com.ssudio.sfr.SFRApplication;
@@ -41,7 +43,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class RegistrationFragment extends Fragment
-        implements IRegistrationView, IConnectivityListenerView, ILoadingView {
+        implements IRegistrationView, IConnectivityListenerView, ILoadingView, Validator.ValidationListener {
     @Inject
     LocalAuthenticationService localAuthService;
     @Inject
@@ -53,12 +55,16 @@ public class RegistrationFragment extends Fragment
 
     @BindView(R.id.btnSubmit)
     protected Button btnSubmit;
+    @Required(order = 1)
     @BindView(R.id.txtName)
     protected EditText txtName;
+    @Required(order = 2)
     @BindView(R.id.txtPhone)
     protected EditText txtPhone;
+    @Required(order = 3)
     @BindView(R.id.txtVerificationCode)
     protected EditText txtVerificationCode;
+    private Validator userDetailsValidator;
 
     public RegistrationFragment() {
         // Required empty public constructor
@@ -88,6 +94,8 @@ public class RegistrationFragment extends Fragment
 
         setupViews();
 
+        setupValidators();
+
         return v;
     }
 
@@ -97,25 +105,16 @@ public class RegistrationFragment extends Fragment
         }
     }
 
+    private void setupValidators() {
+        userDetailsValidator = new Validator(this);
+
+        //'this' class implements ValidationListener
+        userDetailsValidator.setValidationListener(this);
+    }
+
     @OnClick(R.id.btnSubmit)
     public void btnSubmit_Click() {
-        UserModel model;
-
-        if (localAuthService.isValidUser()) {
-            model = localAuthService.getLocalAuthenticatedUser();
-
-            model.setName(txtName.getText().toString());
-            model.setPhoneNumber(txtPhone.getText().toString());
-
-            registrationPresenter.update(model);
-        } else {
-            model = new UserModel(txtName.getText().toString(),
-                    txtPhone.getText().toString(),
-                    txtVerificationCode.getText().toString(),
-                    sharedPreferences.getString(QuickstartPreferences.DEVICE_REGISTRATION_TOKEN, ""));
-
-            registrationPresenter.register(model);
-        }
+        userDetailsValidator.validate();
     }
 
     @Override
@@ -196,6 +195,47 @@ public class RegistrationFragment extends Fragment
     @Override
     public void dismissLoading() {
         getParentView().dismissLoading();
+    }
+
+
+    @Override
+    public void onValidationSucceeded() {
+        clearErrorMessageOnEditText();
+
+        UserModel model;
+
+        if (localAuthService.isValidUser()) {
+            model = localAuthService.getLocalAuthenticatedUser();
+
+            model.setName(txtName.getText().toString());
+            model.setPhoneNumber(txtPhone.getText().toString());
+
+            registrationPresenter.update(model);
+        } else {
+            model = new UserModel(txtName.getText().toString(),
+                    txtPhone.getText().toString(),
+                    txtVerificationCode.getText().toString(),
+                    sharedPreferences.getString(QuickstartPreferences.DEVICE_REGISTRATION_TOKEN, ""));
+
+            registrationPresenter.register(model);
+        }
+    }
+
+    private void clearErrorMessageOnEditText() {
+        txtName.setError(null);
+        txtPhone.setError(null);
+        txtVerificationCode.setError(null);
+    }
+
+    @Override
+    public void onValidationFailed(View failedView, Rule<?> failedRule) {
+        String failureMessage = failedRule.getFailureMessage();
+
+        failedView.requestFocus();
+
+        if (failedView instanceof EditText) {
+            ((EditText)failedView).setError(failureMessage);
+        }
     }
 
     @Override

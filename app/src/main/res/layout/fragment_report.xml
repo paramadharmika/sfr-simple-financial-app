@@ -75,6 +75,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Jumlah total: 999"
+            android:textAlignment="viewEnd"
+            android:layout_marginTop="16dp"
+            android:layout_marginRight="8dp"
             android:visibility="gone" />
 
     </LinearLayout>

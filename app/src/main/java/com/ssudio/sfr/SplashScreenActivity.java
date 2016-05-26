@@ -72,6 +72,7 @@ public class SplashScreenActivity extends AppCompatActivity
     protected TextView txtAppDescription;
     @BindView(R.id.imgSplash)
     protected ImageView imgSplash;
+    private Snackbar snackbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +93,29 @@ public class SplashScreenActivity extends AppCompatActivity
         components.inject(this);
 
         getDeviceRegistrationId();
+
+        setupSnackBar();
+    }
+
+    private void setupSnackBar() {
+        snackbar = Snackbar
+                .make(coordinatorLayout, "", Snackbar.LENGTH_INDEFINITE)
+                .setAction("OK", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        finish();
+                    }
+                });
+
+        // Changing message text color
+        snackbar.setActionTextColor(Color.RED);
+
+        // Changing action button text color
+        View sbView = snackbar.getView();
+
+        TextView textView = (TextView) sbView.findViewById(android.support.design.R.id.snackbar_text);
+
+        textView.setTextColor(Color.YELLOW);
     }
 
     private void getDeviceRegistrationId() {
@@ -210,40 +234,16 @@ public class SplashScreenActivity extends AppCompatActivity
                 String message;
 
                 if (e.isConnected()) {
-                    message = getString(R.string.message_network_connected);
-                } else {
-                    message = getString(R.string.message_network_is_not_connected);
+                    snackbar.dismiss();
 
-                    showNetworkNotConnected(message);
+                    splashScreenPresenter.getAppInfoAsync();
+                } else {
+                    snackbar.setText(getString(R.string.message_network_is_not_connected));
+
+                    snackbar.show();
                 }
             }
         });
-    }
-
-    private void showNetworkNotConnected(String message) {
-        Snackbar snackbar = Snackbar
-                .make(coordinatorLayout, message, Snackbar.LENGTH_INDEFINITE)
-                .setAction("OK", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        finish();
-                    }
-                });
-
-        // Changing message text color
-        snackbar.setActionTextColor(Color.RED);
-
-        // Changing action button text color
-        View sbView = snackbar.getView();
-
-        TextView textView = (TextView) sbView.findViewById(android.support.design.R.id.snackbar_text);
-
-        textView.setTextColor(Color.YELLOW);
-
-        snackbar.show();
-
-        /*((android.support.design.widget.CoordinatorLayout.LayoutParams) snackbar.getView().getLayoutParams()).setBehavior(null);*/
-
     }
 
     @Override
