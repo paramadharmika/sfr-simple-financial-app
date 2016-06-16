@@ -84,4 +84,6 @@
     <string name="total_amount">"Jumlah total: "</string>
     <string name="message_network_connected">Network connected</string>
     <string name="message_network_is_not_connected">No network connectivity</string>
+    <string name="reff_code">Referrer</string>
+    <string name="valid_until">Valid until</string>
 </resources>

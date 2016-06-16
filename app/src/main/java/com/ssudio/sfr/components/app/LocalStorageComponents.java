@@ -19,6 +19,6 @@ public interface LocalStorageComponents {
     SettingsLocalStorage provideSettingsLocalStorage();
     SharedPreferences provideSharedPreferences();
 
-    void inject(MainActivity mainActivity);
+    //void inject(MainActivity mainActivity);
     /*void inject(SplashScreenActivity mainActivity);*/
 }

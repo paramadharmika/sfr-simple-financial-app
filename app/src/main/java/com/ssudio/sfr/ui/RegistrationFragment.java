@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mobsandgeeks.saripaar.Rule;
@@ -64,6 +65,15 @@ public class RegistrationFragment extends Fragment
     @Required(order = 3)
     @BindView(R.id.txtVerificationCode)
     protected EditText txtVerificationCode;
+    @Required(order = 4)
+    @BindView(R.id.txtReffCode)
+    protected EditText txtReffCode;
+    @Required(order = 5)
+    @BindView(R.id.txtValidUntil)
+    protected EditText txtValidUntil;
+    @BindView(R.id.lblValidUntil)
+    protected TextView lblValidUntil;
+
     private Validator userDetailsValidator;
 
     public RegistrationFragment() {
@@ -136,8 +146,17 @@ public class RegistrationFragment extends Fragment
         if (e.getIsSuccess() && e.getModel() != null) {
             txtName.setText(e.getModel().getName());
             txtPhone.setText(e.getModel().getPhoneNumber());
+
             txtVerificationCode.setText(e.getModel().getVerificationCode());
             txtVerificationCode.setEnabled(false);
+
+            txtReffCode.setText(e.getModel().getReffCode());
+            txtReffCode.setEnabled(false);
+
+            lblValidUntil.setVisibility(View.VISIBLE);
+            txtValidUntil.setVisibility(View.VISIBLE);
+            txtValidUntil.setText(e.getModel().getLicenseUntil());
+            txtValidUntil.setEnabled(false);
         } else {
             getParentView().showMessage(e.getIsSuccess(), e.getMessage());
         }
@@ -215,7 +234,8 @@ public class RegistrationFragment extends Fragment
             model = new UserModel(txtName.getText().toString(),
                     txtPhone.getText().toString(),
                     txtVerificationCode.getText().toString(),
-                    sharedPreferences.getString(QuickstartPreferences.DEVICE_REGISTRATION_TOKEN, ""));
+                    sharedPreferences.getString(QuickstartPreferences.DEVICE_REGISTRATION_TOKEN, ""),
+                    txtReffCode.getText().toString());
 
             registrationPresenter.register(model);
         }
@@ -225,6 +245,7 @@ public class RegistrationFragment extends Fragment
         txtName.setError(null);
         txtPhone.setError(null);
         txtVerificationCode.setError(null);
+        txtReffCode.setError(null);
     }
 
     @Override

@@ -5,7 +5,9 @@ import com.ssudio.sfr.configuration.IAppConfiguration;
 import com.ssudio.sfr.network.ui.IConnectivityListenerView;
 import com.ssudio.sfr.network.ui.ILoadingView;
 import com.ssudio.sfr.report.command.IReportCommand;
+import com.ssudio.sfr.report.command.IUploadReportCommand;
 import com.ssudio.sfr.report.command.ReportCommand;
+import com.ssudio.sfr.report.command.UploadReportCommand;
 import com.ssudio.sfr.report.presenter.IReportView;
 import com.ssudio.sfr.report.presenter.ReportPresenter;
 import com.ssudio.sfr.scope.UserScope;
@@ -33,11 +35,13 @@ public class ReportModule {
     public ReportPresenter getPresenter(IReportView view,
                                         IConnectivityListenerView connectivityListenerView,
                                         ILoadingView loadingView,
-                                        IReportCommand reportCommand) {
+                                        IReportCommand reportCommand,
+                                        IUploadReportCommand uploadReportCommand) {
 
         ReportPresenter presenter = new ReportPresenter(view, connectivityListenerView, loadingView);
 
         presenter.setReportCommand(reportCommand);
+        presenter.setUploadCommand(uploadReportCommand);
 
         return presenter;
     }
@@ -64,5 +68,11 @@ public class ReportModule {
     @Provides
     public IReportCommand getReportCommand(OkHttpClient client, Gson gson, IAppConfiguration appConfiguration) {
         return new ReportCommand(client, gson, appConfiguration);
+    }
+
+    @UserScope
+    @Provides
+    public IUploadReportCommand getUploadReportCommand(OkHttpClient client, Gson gson, IAppConfiguration appConfiguration) {
+        return new UploadReportCommand(client, gson, appConfiguration);
     }
 }

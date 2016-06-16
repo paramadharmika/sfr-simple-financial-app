@@ -24,8 +24,11 @@ public class UserModel implements Serializable {
     private String level;
     @SerializedName("join_date")
     private String joinDate;
+    @SerializedName("reff_code")
+    private String reffCode;
 
-    public UserModel(String name, String phoneNumber, String verificationCode, String deviceRegistrationId) {
+    public UserModel(String name, String phoneNumber, String verificationCode, String deviceRegistrationId, String reffCode) {
+        this.reffCode = reffCode;
         this.id = 0;
         this.name = name;
         this.phoneNumber = phoneNumber;
@@ -95,6 +98,10 @@ public class UserModel implements Serializable {
 
     public String getDeviceRegistrationId() {
         return deviceRegistrationId;
+    }
+
+    public String getReffCode() {
+        return reffCode;
     }
 
     /*public void setDeviceRegistrationId(String deviceRegistrationId) {

@@ -4,6 +4,6 @@ public class AppConfiguration implements IAppConfiguration {
 
     @Override
     public String getBaseUrl() {
-        return " http://laporan-kegiatan.xyz/";
+        return "http://laporan-kegiatan.xyz/";
     }
 }

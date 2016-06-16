@@ -26,11 +26,15 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
 import com.kaopiz.kprogresshud.KProgressHUD;
+import com.ssudio.sfr.authentication.LocalAuthenticationService;
 import com.ssudio.sfr.components.app.DaggerLocalStorageComponents;
 import com.ssudio.sfr.components.app.LocalStorageComponents;
+import com.ssudio.sfr.components.ui.BasePresenterComponent;
+import com.ssudio.sfr.components.ui.DaggerBasePresenterComponent;
 import com.ssudio.sfr.device.QuickstartPreferences;
 import com.ssudio.sfr.device.SfrGcmRegistrationIntentService;
 import com.ssudio.sfr.modules.LocalStorageModule;
+import com.ssudio.sfr.modules.NetworkModule;
 import com.ssudio.sfr.ui.IContainerViewCallback;
 import com.ssudio.sfr.ui.DashboardFragment;
 import com.ssudio.sfr.ui.RegistrationFragment;
@@ -50,6 +54,8 @@ public class MainActivity extends AppCompatActivity implements IContainerViewCal
 
     @Inject
     protected SharedPreferences sharedPreferences;
+    @Inject
+    protected LocalAuthenticationService localAuthenticationService;
 
     @BindView(R.id.coordinatorLayout)
     protected CoordinatorLayout coordinatorLayout;
@@ -62,12 +68,20 @@ public class MainActivity extends AppCompatActivity implements IContainerViewCal
 
         ButterKnife.bind(this);
 
-        LocalStorageComponents localStorageComponents = DaggerLocalStorageComponents.builder()
+        BasePresenterComponent basePresenterComponent = DaggerBasePresenterComponent.builder()
+                .sFRApplicationModule(((SFRApplication)getApplication()).getSfrApplicationModule())
+                .localStorageModule(new LocalStorageModule())
+                .networkModule(new NetworkModule())
+                .build();
+
+        basePresenterComponent.inject(this);
+
+        /*LocalStorageComponents localStorageComponents = DaggerLocalStorageComponents.builder()
                 .sFRApplicationModule(((SFRApplication)getApplication()).getSfrApplicationModule())
                 .localStorageModule(new LocalStorageModule())
                 .build();
 
-        localStorageComponents.inject(this);
+        localStorageComponents.inject(this);*/
 
         setupBottomBar();
 
@@ -103,11 +117,6 @@ public class MainActivity extends AppCompatActivity implements IContainerViewCal
 
             // If this is not the top level media (root), we add it to the fragment back stack,
             // so that actionbar toggle and Back button will work appropriately:
-            //todo: should i add this to backstack
-            /*if (mediaId != null) {
-                transaction.addToBackStack(null);
-            }*/
-
             transaction.commit();
         } else if (fragmentType == 2) {
             if (registrationFragment == null) {
@@ -132,7 +141,8 @@ public class MainActivity extends AppCompatActivity implements IContainerViewCal
         Intent sendIntent = new Intent();
 
         sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, message);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, message + " " +
+                localAuthenticationService.getLocalAuthenticatedUser().getReffCode());
         sendIntent.setType("text/plain");
 
         startActivity(sendIntent);
@@ -231,7 +241,6 @@ public class MainActivity extends AppCompatActivity implements IContainerViewCal
                 .setAction("OK", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        //todo: request focus to text maybe?
                     }
                 });
 

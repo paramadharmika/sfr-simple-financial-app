@@ -35,6 +35,8 @@ dependencies {
     compile 'com.android.support:design:23.0.1'
     compile 'com.android.support:support-v4:23.0.1'
     compile 'com.squareup.okhttp3:okhttp:3.2.0'
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.jakewharton:butterknife:8.0.1'
     compile 'com.google.dagger:dagger:2.2'
     compile 'org.greenrobot:eventbus:3.0.0'
@@ -44,4 +46,8 @@ dependencies {
     compile 'com.aurelhubert:ahbottomnavigation:1.2.0'
     compile 'com.kaopiz:kprogresshud:1.0.5'
     compile 'com.mobsandgeeks:android-saripaar:1.0.3'
+    compile group: 'org.apache.httpcomponents' , name: 'httpclient-android' , version: '4.3.5.1'
+    compile('org.apache.httpcomponents:httpmime:4.3') {
+        exclude module: "httpclient"
+    }
 }

@@ -1,5 +1,6 @@
 package com.ssudio.sfr.components.ui;
 
+import com.ssudio.sfr.MainActivity;
 import com.ssudio.sfr.SplashScreenActivity;
 import com.ssudio.sfr.modules.DashboardModule;
 import com.ssudio.sfr.modules.LocalAuthenticationModule;
@@ -30,4 +31,5 @@ public interface BasePresenterComponent {
     ReportComponents newReportSubComponent(ReportModule dashboardModule);
 
     void inject(RegistrationPresenter registrationPresenter);
+    void inject(MainActivity mainActivity);
 }

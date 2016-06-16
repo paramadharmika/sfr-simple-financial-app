@@ -2,13 +2,20 @@ package com.ssudio.sfr.ui;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TableLayout;
@@ -35,10 +42,23 @@ import com.ssudio.sfr.network.ui.IConnectivityListenerView;
 import com.ssudio.sfr.network.ui.ILoadingView;
 import com.ssudio.sfr.report.model.ReportRequestModel;
 import com.ssudio.sfr.report.model.ReportResponseModel;
+import com.ssudio.sfr.report.model.UploadReportModel;
 import com.ssudio.sfr.report.presenter.IReportView;
 import com.ssudio.sfr.report.presenter.ReportPresenter;
 import com.ssudio.sfr.utility.DateUtility;
+import com.ssudio.sfr.utility.ImageSelectorUtility;
 
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -59,6 +79,9 @@ import butterknife.OnClick;
  */
 public class ReportFragment extends Fragment
         implements IReportView, IConnectivityListenerView, ILoadingView, Validator.ValidationListener {
+
+    private static final int SELECT_FILE = 567483;
+
     @Inject
     LocalAuthenticationService localAuthService;
     @Inject
@@ -79,6 +102,8 @@ public class ReportFragment extends Fragment
     @BindView(R.id.txtTotal)
     protected TextView txtTotal;
 
+    private Button selectedUploadButton;
+
     private Validator userDetailsValidator;
 
     private DatePickerDialog fromDatePickerDialog;
@@ -87,6 +112,7 @@ public class ReportFragment extends Fragment
     private SimpleDateFormat dateFormatter;
     private Date startPeriod;
     private Date endPeriod;
+    private int selectedId;
 
     public ReportFragment() {
         // Required empty public constructor
@@ -283,6 +309,36 @@ public class ReportFragment extends Fragment
             /*lblAmount.setTextColor(Color.WHITE);*/
             tr.addView(lblAmount);
 
+            final int temporaryId = id++;
+            Button btnUpload = new Button(getActivity());
+            btnUpload.setId(temporaryId);
+            btnUpload.setTag(result.get(i).getId());
+            btnUpload.setText("Upload");
+
+            int proofId;
+            try {
+                proofId = Integer.parseInt(result.get(i).getProofId());
+            } catch (Exception e) {
+                proofId = 0;
+            }
+
+            if (proofId >= 1) {
+                btnUpload.setVisibility(View.GONE);
+            } else {
+                btnUpload.setVisibility(View.VISIBLE);
+
+                btnUpload.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int reportId = Integer.valueOf(v.getTag().toString());
+
+                        showUploadCamera(reportId, temporaryId);
+                    }
+                });
+            }
+
+            tr.addView(btnUpload);
+
             total += result.get(i).getAmount();
 
             tblLayoutContainer.addView(tr);
@@ -291,9 +347,70 @@ public class ReportFragment extends Fragment
         bindTotalLabel(total);
     }
 
+    private void showUploadCamera(int reportId, int temporaryId) {
+        if (ImageSelectorUtility.checkPermission(getActivity())) {
+            this.selectedId = reportId;
+
+            selectedUploadButton = (Button) getActivity().findViewById(temporaryId);
+
+            showGallery();
+        }
+    }
+
+    private void showGallery() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);//
+        startActivityForResult(Intent.createChooser(intent, "Select File"), SELECT_FILE);
+    }
+
     private void bindTotalLabel(double total) {
         txtTotal.setVisibility(View.VISIBLE);
         txtTotal.setText(getResources().getString(R.string.total_amount) + String.valueOf(total));
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == SELECT_FILE) {
+                onImageSelected(data);
+            }
+        }
+    }
+
+    private void onImageSelected(Intent data) {
+        //Bitmap bm = null;
+
+        if (data != null) {
+            //bm = MediaStore.Images.Media.getBitmap(getActivity().getApplicationContext().getContentResolver(), data.getData());
+
+            Uri videoUri = data.getData();
+
+            String selectedPath = getPath(videoUri);
+
+            UploadReportModel model = new UploadReportModel(
+                    localAuthService.getLocalVerificationCode(), selectedPath, selectedId);
+
+            executeMultipartPost(model);
+        }
+    }
+
+    private String getPath(Uri uri) {
+        String[] projection = {MediaStore.Images.Media.DATA, MediaStore.Images.Media.SIZE};
+
+        Cursor cursor = getActivity().getContentResolver().query(uri, projection, null, null, null);
+
+        assert cursor != null;
+
+        cursor.moveToFirst();
+
+        return cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
+    }
+
+    public void executeMultipartPost(UploadReportModel model) {
+        reportPresenter.uploadFile(model);
     }
 
     @Override
@@ -355,6 +472,16 @@ public class ReportFragment extends Fragment
         if (failedView instanceof EditText) {
             ((EditText)failedView).setError(failureMessage);
         }
+    }
+
+    public void showReportItemUploaded(boolean isSuccess, String message) {
+        if (isSuccess) {
+            selectedId = 0;
+            selectedUploadButton.setVisibility(View.GONE);
+            selectedUploadButton = null;
+        }
+
+        getParentView().showMessage(isSuccess, message);
     }
 
     @Override

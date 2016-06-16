@@ -17,7 +17,6 @@ public class DateUtility {
 
             return datetime;
         } catch (ParseException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
