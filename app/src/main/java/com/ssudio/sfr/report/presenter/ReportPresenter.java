@@ -6,6 +6,7 @@ import com.ssudio.sfr.network.ui.ILoadingView;
 import com.ssudio.sfr.report.command.IReportCommand;
 import com.ssudio.sfr.report.command.IUploadReportCommand;
 import com.ssudio.sfr.report.event.APIGetReportProgressEvent;
+import com.ssudio.sfr.report.event.APIUploadReportProgressEvent;
 import com.ssudio.sfr.report.event.ReportEvent;
 import com.ssudio.sfr.report.event.UploadReportEvent;
 import com.ssudio.sfr.report.model.ReportRequestModel;
@@ -46,20 +47,25 @@ public class ReportPresenter implements IReportPresenter {
     }
 
     @Subscribe
+    public void onAPIGetReportProgressEvent(APIGetReportProgressEvent e) {
+        loadingView.showLoading();
+    }
+
+    @Subscribe
     public void onReportEvent(ReportEvent e) {
         view.bindReport(e.getReports());
         loadingView.dismissLoading();
     }
 
     @Subscribe
-    public void onReportUploadEvent(UploadReportEvent e) {
-        view.showReportItemUploaded(e.getEventStatus() == UploadReportEvent.REPORT_UPLOADED, e.getMessage());
-        loadingView.dismissLoading();
+    public void onAPIReportUploadStarted(APIUploadReportProgressEvent e) {
+        loadingView.showLoading();
     }
 
     @Subscribe
-    public void onAPIGetReportProgressEvent(APIGetReportProgressEvent e) {
-        loadingView.showLoading();
+    public void onReportUploadEvent(UploadReportEvent e) {
+        view.showReportItemUploaded(e.getEventStatus() == UploadReportEvent.REPORT_UPLOADED, e.getMessage());
+        loadingView.dismissLoading();
     }
 
     @Subscribe

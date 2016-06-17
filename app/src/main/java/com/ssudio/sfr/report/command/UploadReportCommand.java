@@ -2,8 +2,15 @@ package com.ssudio.sfr.report.command;
 
 import com.google.gson.Gson;
 import com.ssudio.sfr.configuration.IAppConfiguration;
+import com.ssudio.sfr.dashboard.events.APIDashboardCallProgressEvent;
+import com.ssudio.sfr.network.request.SFRNetworkRequestType;
+import com.ssudio.sfr.network.response.SFRApiPostResponse;
 import com.ssudio.sfr.report.command.retrofit.IUploadRetrofitCommand;
+import com.ssudio.sfr.report.event.APIUploadReportProgressEvent;
+import com.ssudio.sfr.report.event.UploadReportEvent;
 import com.ssudio.sfr.report.model.UploadReportModel;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 
@@ -45,20 +52,33 @@ public class UploadReportCommand implements IUploadReportCommand {
 
         RequestBody image = RequestBody.create(MediaType.parse("image/jpeg"), new File(param.getFileName()));
         RequestBody verificationCode = RequestBody.create(MediaType.parse("text/plain"), param.getVerificationCode());
-        /*RequestBody title = RequestBody.create(MediaType.parse("text/plain"), "upload-report.jpeg");*/
         RequestBody id = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(param.getId()));
 
-        Call<String> call = uploadCommand.uploadReport(image,  verificationCode, id);
+        EventBus.getDefault().post(new APIUploadReportProgressEvent(true));
 
-        call.enqueue(new Callback<String>() {
+        Call<SFRApiPostResponse> call = uploadCommand.uploadReport(image,  verificationCode, id);
+
+        call.enqueue(new Callback<SFRApiPostResponse>() {
             @Override
-            public void onResponse(Call<String> call, retrofit2.Response<String> response) {
-                String s = response.message();
+            public void onResponse(Call<SFRApiPostResponse> call, retrofit2.Response<SFRApiPostResponse> response) {
+                SFRApiPostResponse postResponse = response.body();
+
+                postResponse.setOperation(SFRNetworkRequestType.Insert);
+
+                EventBus.getDefault().post(
+                        new UploadReportEvent(
+                                postResponse.isSuccess() ? UploadReportEvent.REPORT_UPLOADED : UploadReportEvent.FAILED_TO_UPLOAD_REPORT,
+                                postResponse.getStatus()));
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(Call<SFRApiPostResponse> call, Throwable t) {
                 t.printStackTrace();
+
+                EventBus.getDefault().post(
+                        new UploadReportEvent(
+                                UploadReportEvent.FAILED_TO_UPLOAD_REPORT,
+                                "Unknown error has occurred"));
             }
         });
 
