@@ -35,6 +35,7 @@ import com.ssudio.sfr.device.QuickstartPreferences;
 import com.ssudio.sfr.device.SfrGcmRegistrationIntentService;
 import com.ssudio.sfr.modules.LocalStorageModule;
 import com.ssudio.sfr.modules.NetworkModule;
+import com.ssudio.sfr.payment.ui.PaymentFragment;
 import com.ssudio.sfr.ui.IContainerViewCallback;
 import com.ssudio.sfr.ui.DashboardFragment;
 import com.ssudio.sfr.ui.RegistrationFragment;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements IContainerViewCal
     private DashboardFragment dashboardFragment;
     private ReportFragment reportFragment;
     private RegistrationFragment registrationFragment;
+    private PaymentFragment requestFragment;
 
     @Inject
     protected SharedPreferences sharedPreferences;
@@ -134,6 +136,14 @@ public class MainActivity extends AppCompatActivity implements IContainerViewCal
             transaction.replace(R.id.mainContainer, reportFragment, FRAGMENT_TAG);
 
             transaction.commit();
+        } else if (fragmentType == 4) {
+            if (requestFragment == null) {
+                requestFragment = new PaymentFragment();
+            }
+
+            transaction.replace(R.id.mainContainer, requestFragment, FRAGMENT_TAG);
+
+            transaction.commit();
         }
     }
 
@@ -167,9 +177,12 @@ public class MainActivity extends AppCompatActivity implements IContainerViewCal
         AHBottomNavigationItem item3 = new AHBottomNavigationItem(R.string.report_title,
                 R.drawable.book,
                 R.color.colorPrimary);
-        AHBottomNavigationItem item4 = new AHBottomNavigationItem(R.string.share_title,
-                R.drawable.share,
+        AHBottomNavigationItem item4 = new AHBottomNavigationItem(R.string.request_title,
+                R.drawable.request,
                 R.color.colorPrimary);
+        /*AHBottomNavigationItem item4 = new AHBottomNavigationItem(R.string.share_title,
+                R.drawable.share,
+                R.color.colorPrimary);*/
         AHBottomNavigationItem item5 = new AHBottomNavigationItem(R.string.settings_title,
                 R.drawable.settings,
                 R.color.colorPrimary);
@@ -218,14 +231,15 @@ public class MainActivity extends AppCompatActivity implements IContainerViewCal
                     case 0:
                     case 1:
                     case 2:
+                    case 3:
                         changeFragment(position + 1);
                         break;
-                    case 3:
+                    /*case 3:
                         String message = sharedPreferences.getString("share_text",
                                 getString(R.string.pref_default_share_text));
 
                         showShareIntent(message);
-                        break;
+                        break;*/
                     case 4:
                         showSettingsActivity();
                         break;

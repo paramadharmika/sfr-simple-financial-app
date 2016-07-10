@@ -31,9 +31,13 @@ dependencies {
     apt 'com.jakewharton:butterknife-compiler:8.0.1'
     apt 'com.google.dagger:dagger-compiler:2.2'
     provided 'javax.annotation:jsr250-api:1.0'
-    compile 'com.android.support:appcompat-v7:23.0.1'
-    compile 'com.android.support:design:23.0.1'
-    compile 'com.android.support:support-v4:23.0.1'
+    compile group: 'org.apache.httpcomponents', name: 'httpclient-android', version: '4.3.5.1'
+    compile('org.apache.httpcomponents:httpmime:4.3') {
+        exclude module: "httpclient"
+    }
+    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'com.android.support:design:23.4.0'
+    compile 'com.android.support:support-v4:23.4.0'
     compile 'com.squareup.okhttp3:okhttp:3.2.0'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
@@ -46,8 +50,4 @@ dependencies {
     compile 'com.aurelhubert:ahbottomnavigation:1.2.0'
     compile 'com.kaopiz:kprogresshud:1.0.5'
     compile 'com.mobsandgeeks:android-saripaar:1.0.3'
-    compile group: 'org.apache.httpcomponents' , name: 'httpclient-android' , version: '4.3.5.1'
-    compile('org.apache.httpcomponents:httpmime:4.3') {
-        exclude module: "httpclient"
-    }
 }

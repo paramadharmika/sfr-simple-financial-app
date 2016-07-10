@@ -10,6 +10,8 @@ import com.ssudio.sfr.modules.RegistrationModule;
 import com.ssudio.sfr.modules.ReportModule;
 import com.ssudio.sfr.modules.SFRApplicationModule;
 import com.ssudio.sfr.modules.SplashScreenModule;
+import com.ssudio.sfr.payment.component.PaymentComponent;
+import com.ssudio.sfr.payment.module.PaymentModule;
 import com.ssudio.sfr.registration.presenter.RegistrationPresenter;
 import com.ssudio.sfr.ui.ReportFragment;
 
@@ -29,6 +31,7 @@ public interface BasePresenterComponent {
     RegistrationComponents newRegistrationSubComponent(RegistrationModule registrationModule);
     DashboardComponents newDashboardSubComponent(DashboardModule dashboardModule);
     ReportComponents newReportSubComponent(ReportModule dashboardModule);
+    PaymentComponent newPaymentSubComponent(PaymentModule paymentModule);
 
     void inject(RegistrationPresenter registrationPresenter);
     void inject(MainActivity mainActivity);
