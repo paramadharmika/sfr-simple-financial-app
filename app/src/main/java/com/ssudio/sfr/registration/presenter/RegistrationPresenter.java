@@ -80,12 +80,20 @@ public class RegistrationPresenter implements IRegistrationPresenter {
 
     @Subscribe
     public void onAPIGetUserCallProgressEvent(APIGetUserCallProgressEvent e) {
-        loadingView.showLoading();
+        if (e.isLoading()) {
+            loadingView.showLoading();
+        } else {
+            loadingView.dismissLoading();
+        }
     }
 
     @Subscribe
-    public void onAPISaveProfileProgressEvent (APISaveProfileProgressEvent e) {
-        loadingView.showLoading();
+    public void onAPISaveProfileProgressEvent(APISaveProfileProgressEvent e) {
+        if (e.isLoading()) {
+            loadingView.showLoading();
+        } else {
+            loadingView.dismissLoading();
+        }
     }
 
     @Subscribe

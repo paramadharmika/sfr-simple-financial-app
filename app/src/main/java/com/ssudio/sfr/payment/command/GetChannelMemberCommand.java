@@ -7,7 +7,7 @@ import com.ssudio.sfr.network.event.NetworkConnectivityEvent;
 import com.ssudio.sfr.network.request.SFRGeneralPostParameter;
 import com.ssudio.sfr.network.response.SFRApiGetResponse;
 import com.ssudio.sfr.payment.event.APIPaymentProgressEvent;
-import com.ssudio.sfr.payment.event.GetChannelMemberEvent;
+import com.ssudio.sfr.payment.event.GetMemberPaymentMethodEvent;
 import com.ssudio.sfr.payment.model.MemberPaymentModel;
 
 import org.greenrobot.eventbus.EventBus;
@@ -59,14 +59,14 @@ public class GetChannelMemberCommand implements IGetChannelMemberCommand {
                 SFRApiGetResponse<MemberPaymentModel> models = gson.fromJson(result,
                         new TypeToken<SFRApiGetResponse<MemberPaymentModel>>(){}.getType());
 
-                GetChannelMemberEvent event = new GetChannelMemberEvent(models.isSuccess(),
+                GetMemberPaymentMethodEvent event = new GetMemberPaymentMethodEvent(models.isSuccess(),
                         models.getStatus(), models.getData());
 
+                //EventBus.getDefault().post(new APIPaymentProgressEvent(false));
                 EventBus.getDefault().post(event);
-                EventBus.getDefault().post(new APIPaymentProgressEvent(false));
             }
         });
 
-        EventBus.getDefault().post(new APIPaymentProgressEvent(true));
+        //EventBus.getDefault().post(new APIPaymentProgressEvent(true));
     }
 }

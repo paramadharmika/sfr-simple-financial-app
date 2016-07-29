@@ -5,10 +5,10 @@ import com.ssudio.sfr.payment.model.MemberPaymentModel;
 
 import java.util.ArrayList;
 
-public class GetChannelMemberEvent extends BaseActionEvent {
+public class GetMemberPaymentMethodEvent extends BaseActionEvent {
     private ArrayList<MemberPaymentModel> models;
 
-    public GetChannelMemberEvent(boolean isSuccess, String message, ArrayList<MemberPaymentModel> models) {
+    public GetMemberPaymentMethodEvent(boolean isSuccess, String message, ArrayList<MemberPaymentModel> models) {
         super(isSuccess, message);
         this.models = models;
     }

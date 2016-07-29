@@ -41,13 +41,8 @@ public class DashboardPresenter implements IDashboardPresenter {
 
     @Subscribe
     public void onDashboardEvent(DashboardEvent e) {
-        /*if (e.getEventType() == DashboardEvent.INITIAL_LOAD) {
-            temporaryList = e.getModel();
-        } else if (e.getEventType() == DashboardEvent.PULL_TO_REFRESH) {
-            temporaryList.addAll(0, e.getModel());
-        }*/
-
         view.bindContent(e.getModel());
+
         loadingView.dismissLoading();
     }
 

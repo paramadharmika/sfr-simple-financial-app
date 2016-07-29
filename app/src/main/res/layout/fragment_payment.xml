@@ -2,13 +2,14 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	tools:context=".payment.ui.PaymentFragment"
+	tools:context=".payment.ui.PaymentRequestFragment"
 	android:orientation="vertical">
 
 	<TextView
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:text="Withdraw" />
+		android:text="Withdraw"
+		style="@style/TextAppearance.AppCompat.Large" />
 
 	<TextView
 		android:layout_width="match_parent"

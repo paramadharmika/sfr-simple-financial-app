@@ -70,7 +70,8 @@
                 <TextView
                     android:id="@+id/txtHeaderUpload"
                     android:text="Upload"
-                    android:layout_weight="1"/>
+                    android:layout_weight="1"
+                    android:visibility="gone"/>
             </TableRow>
         </TableLayout>
 

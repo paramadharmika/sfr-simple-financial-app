@@ -1,18 +1,23 @@
 package com.ssudio.sfr.payment.model;
 
 import com.google.gson.annotations.SerializedName;
+import com.ssudio.sfr.network.request.SFRGeneralPostParameter;
 
-public class MemberPaymentModel {
+public class MemberPaymentModel extends SFRGeneralPostParameter {
     @SerializedName("id_channel")
     private int idChannel;
     @SerializedName("channel_name")
     private String channelName;
     @SerializedName("id_channel_member")
-    private String idChannelMember;
+    private int idChannelMember;
     @SerializedName("payment_to")
     private String paymentTo;
     @SerializedName("payment_name")
     private String paymentName;
+
+    public MemberPaymentModel(String verificationCode) {
+        super(verificationCode);
+    }
 
     public int getIdChannel() {
         return idChannel;
@@ -30,11 +35,11 @@ public class MemberPaymentModel {
         this.channelName = channelName;
     }
 
-    public String getIdChannelMember() {
+    public int getIdChannelMember() {
         return idChannelMember;
     }
 
-    public void setIdChannelMember(String idChannelMember) {
+    public void setIdChannelMember(int idChannelMember) {
         this.idChannelMember = idChannelMember;
     }
 

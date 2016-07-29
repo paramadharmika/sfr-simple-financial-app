@@ -337,6 +337,8 @@ public class ReportFragment extends Fragment
                 });
             }
 
+            //todo: hide the upload button
+            btnUpload.setVisibility(View.GONE);
             tr.addView(btnUpload);
 
             total += result.get(i).getAmount();

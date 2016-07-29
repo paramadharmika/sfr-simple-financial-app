@@ -62,11 +62,11 @@ public class GetPaymentChannelCommand implements IGetPaymentChannelCommand {
                         models.getStatus(),
                         models.getData());
 
+                //EventBus.getDefault().post(new APIPaymentProgressEvent(false));
                 EventBus.getDefault().post(event);
-                EventBus.getDefault().post(new APIPaymentProgressEvent(false));
             }
         });
 
-        EventBus.getDefault().post(new APIPaymentProgressEvent(true));
+        //EventBus.getDefault().post(new APIPaymentProgressEvent(true));
     }
 }

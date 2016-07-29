@@ -38,8 +38,7 @@ import butterknife.ButterKnife;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class DashboardFragment extends Fragment
-        implements IDashboardView, IConnectivityListenerView, ILoadingView {
+public class DashboardFragment extends Fragment implements IDashboardView, IConnectivityListenerView, ILoadingView {
 
     @Inject
     protected IDashboardPresenter presenter;

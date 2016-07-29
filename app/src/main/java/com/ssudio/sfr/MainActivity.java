@@ -1,44 +1,29 @@
 package com.ssudio.sfr;
 
-
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-
 import com.kaopiz.kprogresshud.KProgressHUD;
 import com.ssudio.sfr.authentication.LocalAuthenticationService;
-import com.ssudio.sfr.components.app.DaggerLocalStorageComponents;
-import com.ssudio.sfr.components.app.LocalStorageComponents;
 import com.ssudio.sfr.components.ui.BasePresenterComponent;
 import com.ssudio.sfr.components.ui.DaggerBasePresenterComponent;
-import com.ssudio.sfr.device.QuickstartPreferences;
-import com.ssudio.sfr.device.SfrGcmRegistrationIntentService;
 import com.ssudio.sfr.modules.LocalStorageModule;
 import com.ssudio.sfr.modules.NetworkModule;
-import com.ssudio.sfr.payment.ui.PaymentFragment;
-import com.ssudio.sfr.ui.IContainerViewCallback;
+import com.ssudio.sfr.payment.ui.PaymentRequestFragment;
+import com.ssudio.sfr.profile.ui.ProfileFragment;
 import com.ssudio.sfr.ui.DashboardFragment;
-import com.ssudio.sfr.ui.RegistrationFragment;
+import com.ssudio.sfr.ui.IContainerViewCallback;
 import com.ssudio.sfr.ui.ReportFragment;
 
 import javax.inject.Inject;
@@ -50,9 +35,9 @@ public class MainActivity extends AppCompatActivity implements IContainerViewCal
     private static final String FRAGMENT_TAG = "main_container";
 
     private DashboardFragment dashboardFragment;
+    private ProfileFragment profileFragment;
     private ReportFragment reportFragment;
-    private RegistrationFragment registrationFragment;
-    private PaymentFragment requestFragment;
+    private PaymentRequestFragment requestFragment;
 
     @Inject
     protected SharedPreferences sharedPreferences;
@@ -78,13 +63,6 @@ public class MainActivity extends AppCompatActivity implements IContainerViewCal
 
         basePresenterComponent.inject(this);
 
-        /*LocalStorageComponents localStorageComponents = DaggerLocalStorageComponents.builder()
-                .sFRApplicationModule(((SFRApplication)getApplication()).getSfrApplicationModule())
-                .localStorageModule(new LocalStorageModule())
-                .build();
-
-        localStorageComponents.inject(this);*/
-
         setupBottomBar();
 
         changeFragment(1);
@@ -98,70 +76,6 @@ public class MainActivity extends AppCompatActivity implements IContainerViewCal
     @Override
     protected void onPause() {
         super.onPause();
-    }
-
-    private void changeFragment(int fragmentType) {
-        FragmentManager fragmentManager = getFragmentManager();
-
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-
-        transaction.setCustomAnimations(R.animator.slide_in_from_right,
-                R.animator.slide_out_to_left,
-                R.animator.slide_in_from_left,
-                R.animator.slide_out_to_right);
-
-        if (fragmentType == 1) {
-            if (dashboardFragment == null) {
-                dashboardFragment = new DashboardFragment();
-            }
-
-            transaction.replace(R.id.mainContainer, dashboardFragment, FRAGMENT_TAG);
-
-            // If this is not the top level media (root), we add it to the fragment back stack,
-            // so that actionbar toggle and Back button will work appropriately:
-            transaction.commit();
-        } else if (fragmentType == 2) {
-            if (registrationFragment == null) {
-                registrationFragment = new RegistrationFragment();
-            }
-
-            transaction.replace(R.id.mainContainer, registrationFragment, FRAGMENT_TAG);
-
-            transaction.commit();
-        } else if (fragmentType == 3) {
-            if (reportFragment == null) {
-                reportFragment = new ReportFragment();
-            }
-
-            transaction.replace(R.id.mainContainer, reportFragment, FRAGMENT_TAG);
-
-            transaction.commit();
-        } else if (fragmentType == 4) {
-            if (requestFragment == null) {
-                requestFragment = new PaymentFragment();
-            }
-
-            transaction.replace(R.id.mainContainer, requestFragment, FRAGMENT_TAG);
-
-            transaction.commit();
-        }
-    }
-
-    private void showShareIntent(String message) {
-        Intent sendIntent = new Intent();
-
-        sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, message + " " +
-                localAuthenticationService.getLocalAuthenticatedUser().getReffCode());
-        sendIntent.setType("text/plain");
-
-        startActivity(sendIntent);
-    }
-
-    private void showSettingsActivity() {
-        Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
-
-        startActivity(settingsIntent);
     }
 
     private void setupBottomBar() {
@@ -180,12 +94,12 @@ public class MainActivity extends AppCompatActivity implements IContainerViewCal
         AHBottomNavigationItem item4 = new AHBottomNavigationItem(R.string.request_title,
                 R.drawable.request,
                 R.color.colorPrimary);
-        /*AHBottomNavigationItem item4 = new AHBottomNavigationItem(R.string.share_title,
+        AHBottomNavigationItem item5 = new AHBottomNavigationItem(R.string.share_title,
                 R.drawable.share,
-                R.color.colorPrimary);*/
-        AHBottomNavigationItem item5 = new AHBottomNavigationItem(R.string.settings_title,
-                R.drawable.settings,
                 R.color.colorPrimary);
+        /*AHBottomNavigationItem item5 = new AHBottomNavigationItem(R.string.settings_title,
+                R.drawable.settings,
+                R.color.colorPrimary);*/
 
         // Add items
         bottomNavigation.addItem(item1);
@@ -234,18 +148,77 @@ public class MainActivity extends AppCompatActivity implements IContainerViewCal
                     case 3:
                         changeFragment(position + 1);
                         break;
-                    /*case 3:
+                    case 4:
                         String message = sharedPreferences.getString("share_text",
                                 getString(R.string.pref_default_share_text));
 
                         showShareIntent(message);
-                        break;*/
-                    case 4:
-                        showSettingsActivity();
                         break;
                 }
             }
         });
+    }
+
+    private void changeFragment(int fragmentType) {
+        FragmentManager fragmentManager = getFragmentManager();
+
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+        transaction.setCustomAnimations(R.animator.slide_in_from_right,
+                R.animator.slide_out_to_left,
+                R.animator.slide_in_from_left,
+                R.animator.slide_out_to_right);
+
+        if (fragmentType == 1) {
+            if (dashboardFragment == null) {
+                dashboardFragment = new DashboardFragment();
+            }
+
+            transaction.replace(R.id.mainContainer, dashboardFragment, FRAGMENT_TAG);
+
+            // If this is not the top level media (root), we add it to the fragment back stack,
+            // so that actionbar toggle and Back button will work appropriately:
+            transaction.commit();
+        } else if (fragmentType == 2) {
+            profileFragment = new ProfileFragment();
+
+            transaction.replace(R.id.mainContainer, profileFragment, FRAGMENT_TAG);
+
+            transaction.commit();
+        } else if (fragmentType == 3) {
+            if (reportFragment == null) {
+                reportFragment = new ReportFragment();
+            }
+
+            transaction.replace(R.id.mainContainer, reportFragment, FRAGMENT_TAG);
+
+            transaction.commit();
+        } else if (fragmentType == 4) {
+            if (requestFragment == null) {
+                requestFragment = new PaymentRequestFragment();
+            }
+
+            transaction.replace(R.id.mainContainer, requestFragment, FRAGMENT_TAG);
+
+            transaction.commit();
+        }
+    }
+
+    private void showShareIntent(String message) {
+        Intent sendIntent = new Intent();
+
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, message + " " +
+                localAuthenticationService.getLocalAuthenticatedUser().getReffCode());
+        sendIntent.setType("text/plain");
+
+        startActivity(sendIntent);
+    }
+
+    private void showSettingsActivity() {
+        Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
+
+        startActivity(settingsIntent);
     }
 
     @Override

@@ -1,13 +1,13 @@
-package com.ssudio.sfr.registration.command;
+package com.ssudio.sfr.payment.command;
 
 import com.google.gson.Gson;
 import com.ssudio.sfr.configuration.IAppConfiguration;
-import com.ssudio.sfr.registration.event.APISaveProfileProgressEvent;
 import com.ssudio.sfr.network.event.NetworkConnectivityEvent;
 import com.ssudio.sfr.network.request.SFRNetworkRequestType;
 import com.ssudio.sfr.network.response.SFRApiPostResponse;
-import com.ssudio.sfr.registration.event.ProfileEvent;
-import com.ssudio.sfr.registration.model.UserModel;
+import com.ssudio.sfr.payment.event.APIPaymentProgressEvent;
+import com.ssudio.sfr.payment.event.SavePaymentEvent;
+import com.ssudio.sfr.payment.model.MemberPaymentModel;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -23,7 +23,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class UpdateProfileCommand implements IUpdateProfileCommand {
+public class SavePaymentProfileCommand implements ISavePaymentProfileCommand {
     private IAppConfiguration appConfiguration;
     private OkHttpClient client;
     private Gson gson;
@@ -31,18 +31,18 @@ public class UpdateProfileCommand implements IUpdateProfileCommand {
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     @Inject
-    public UpdateProfileCommand(OkHttpClient client, Gson gson, IAppConfiguration appConfiguration) {
+    public SavePaymentProfileCommand(OkHttpClient client, Gson gson, IAppConfiguration appConfiguration) {
         this.client = client;
         this.gson = gson;
         this.appConfiguration = appConfiguration;
     }
 
     @Override
-    public void executeAsync(final UserModel param) {
+    public void executeAsync(final MemberPaymentModel param) {
         RequestBody body = RequestBody.create(JSON, gson.toJson(param));
 
         Request request = new Request.Builder()
-                .url(appConfiguration.getBaseUrl() + "updateUser")
+                .url(appConfiguration.getBaseUrl() + "saveChannelMember")
                 .post(body)
                 .build();
 
@@ -59,19 +59,21 @@ public class UpdateProfileCommand implements IUpdateProfileCommand {
 
                 SFRApiPostResponse apiResponse = gson.fromJson(result, SFRApiPostResponse.class);
 
-                apiResponse.setOperation(SFRNetworkRequestType.Update);
+                if (param.getIdChannelMember() == 0) {
+                    apiResponse.setOperation(SFRNetworkRequestType.Insert);
+                } else {
+                    apiResponse.setOperation(SFRNetworkRequestType.Update);
+                }
 
-                ProfileEvent profileEvent = new ProfileEvent(
+                SavePaymentEvent event = new SavePaymentEvent(
                         apiResponse.isSuccess(),
-                        apiResponse.getStatus(),
-                        ProfileEvent.UPDATED,
-                        param);
+                        apiResponse.getStatus());
 
-                EventBus.getDefault().post(new APISaveProfileProgressEvent(false));
-                EventBus.getDefault().post(profileEvent);
+                EventBus.getDefault().post(new APIPaymentProgressEvent(false));
+                EventBus.getDefault().post(event);
             }
         });
 
-        EventBus.getDefault().post(new APISaveProfileProgressEvent(true));
+        EventBus.getDefault().post(new APIPaymentProgressEvent(true));
     }
 }

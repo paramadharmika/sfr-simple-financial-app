@@ -69,6 +69,7 @@ public class GetProfileCommand implements IGetProfileCommand {
                         ProfileEvent.LOADED,
                         model);
 
+                EventBus.getDefault().post(new APIGetUserCallProgressEvent(false));
                 EventBus.getDefault().post(profileEvent);
             }
         });

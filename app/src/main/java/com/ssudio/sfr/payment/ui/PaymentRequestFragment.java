@@ -1,9 +1,9 @@
 package com.ssudio.sfr.payment.ui;
 
+import android.app.Fragment;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +14,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.kaopiz.kprogresshud.KProgressHUD;
 import com.ssudio.sfr.R;
 import com.ssudio.sfr.SFRApplication;
 import com.ssudio.sfr.authentication.LocalAuthenticationService;
@@ -25,12 +26,10 @@ import com.ssudio.sfr.modules.NetworkModule;
 import com.ssudio.sfr.network.event.NetworkConnectivityEvent;
 import com.ssudio.sfr.network.ui.IConnectivityListenerView;
 import com.ssudio.sfr.network.ui.ILoadingView;
-import com.ssudio.sfr.payment.component.PaymentComponent;
+import com.ssudio.sfr.payment.component.PaymentRequestComponent;
 import com.ssudio.sfr.payment.model.PaymentModel;
-import com.ssudio.sfr.payment.model.PreferredPaymentModel;
-import com.ssudio.sfr.payment.module.PaymentModule;
-import com.ssudio.sfr.payment.presenter.PaymentPresenter;
-import com.ssudio.sfr.registration.model.UserModel;
+import com.ssudio.sfr.payment.module.PaymentRequestModule;
+import com.ssudio.sfr.payment.presenter.PaymentRequestPresenter;
 import com.ssudio.sfr.ui.IContainerViewCallback;
 import com.ssudio.sfr.utility.MoneyTextWatcher;
 
@@ -45,14 +44,13 @@ import butterknife.OnClick;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class PaymentFragment extends Fragment
-        implements IPaymentView, IConnectivityListenerView, ILoadingView {
+public class PaymentRequestFragment extends Fragment implements IPaymentRequestView, IConnectivityListenerView, ILoadingView {
 
     @Inject
     LocalAuthenticationService localAuthService;
     @Inject
-    protected PaymentPresenter paymentPresenter;
-    private PaymentComponent components;
+    protected PaymentRequestPresenter paymentPresenter;
+    private PaymentRequestComponent components;
 
     @BindView(R.id.spinnerChannelPayment)
     protected Spinner spinnerChannelPayment;
@@ -63,8 +61,9 @@ public class PaymentFragment extends Fragment
 
     private ArrayList<PaymentModel> payments;
     private PaymentModel selectedPaymentModel;
+    private KProgressHUD loadingView;
 
-    public PaymentFragment() {
+    public PaymentRequestFragment() {
         // Required empty public constructor
     }
 
@@ -81,7 +80,7 @@ public class PaymentFragment extends Fragment
                     .networkModule(new NetworkModule())
                     .build();
 
-        components = basePresenterComponent.newPaymentSubComponent(new PaymentModule(this, this, this));
+        components = basePresenterComponent.newPaymentRequestSubComponent(new PaymentRequestModule(this, this, this));
 
         components.inject(this);
 
@@ -196,12 +195,21 @@ public class PaymentFragment extends Fragment
 
     @Override
     public void showLoading() {
-        getParentView().showLoading();
+        loadingView = KProgressHUD.create(getActivity())
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setLabel("Please wait")
+                .setCancellable(true)
+                .setAnimationSpeed(2)
+                .setDimAmount(0.5f);
+
+        loadingView.show();
     }
 
     @Override
     public void dismissLoading() {
-        getParentView().dismissLoading();
+        if (loadingView.isShowing()) {
+            loadingView.dismiss();
+        }
     }
 
     @Override

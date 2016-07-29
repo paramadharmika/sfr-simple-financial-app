@@ -7,5 +7,4 @@ import java.util.ArrayList;
 
 public interface IPaymentView extends IParentChildConnection {
     void bindPayments(ArrayList<PaymentModel> model);
-    void showMessage(boolean isSuccess, String message);
 }

@@ -1,6 +1,5 @@
 package com.ssudio.sfr.ui;
 
-
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
@@ -12,12 +11,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.kaopiz.kprogresshud.KProgressHUD;
 import com.mobsandgeeks.saripaar.Rule;
 import com.mobsandgeeks.saripaar.Validator;
 import com.mobsandgeeks.saripaar.annotation.Required;
-import com.ssudio.sfr.MainActivity;
+import com.ssudio.sfr.PaymentProfileActivity;
 import com.ssudio.sfr.R;
 import com.ssudio.sfr.SFRApplication;
 import com.ssudio.sfr.authentication.LocalAuthenticationService;
@@ -43,8 +42,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class RegistrationFragment extends Fragment
-        implements IRegistrationView, IConnectivityListenerView, ILoadingView, Validator.ValidationListener {
+public class RegistrationFragment extends Fragment implements IRegistrationView,
+        IConnectivityListenerView, ILoadingView, Validator.ValidationListener {
+
     @Inject
     LocalAuthenticationService localAuthService;
     @Inject
@@ -75,6 +75,7 @@ public class RegistrationFragment extends Fragment
     protected TextView lblValidUntil;
 
     private Validator userDetailsValidator;
+    private KProgressHUD loadingView;
 
     public RegistrationFragment() {
         // Required empty public constructor
@@ -160,30 +161,24 @@ public class RegistrationFragment extends Fragment
         } else {
             getParentView().showMessage(e.getIsSuccess(), e.getMessage());
         }
-
-        dismissLoading();
     }
 
     @Override
     public void showRegistrationCallback(ProfileEvent e) {
         if (e.getIsSuccess()) {
-            Intent intent = new Intent(getActivity(), MainActivity.class);
+            Intent intent = new Intent(getActivity(), PaymentProfileActivity.class);
 
             startActivity(intent);
 
             getActivity().finish();
         } else {
             getParentView().showMessage(e.getIsSuccess(), e.getMessage());
-
-            dismissLoading();
         }
     }
 
     @Override
     public void showUpdatedRegistrationCallback(ProfileEvent e) {
         getParentView().showMessage(e.getIsSuccess(), e.getMessage());
-
-        dismissLoading();
     }
 
     @Override
@@ -201,21 +196,29 @@ public class RegistrationFragment extends Fragment
                     message = getString(R.string.message_network_is_not_connected);
                 }
 
-                Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+                getParentView().showMessage(e.isConnected(), message);
             }
         });
     }
 
     @Override
     public void showLoading() {
-        getParentView().showLoading();
+        loadingView = KProgressHUD.create(getActivity())
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setLabel("Please wait")
+                .setCancellable(true)
+                .setAnimationSpeed(2)
+                .setDimAmount(0.5f);
+
+        loadingView.show();
     }
 
     @Override
     public void dismissLoading() {
-        getParentView().dismissLoading();
+        if (loadingView.isShowing()) {
+            loadingView.dismiss();
+        }
     }
-
 
     @Override
     public void onValidationSucceeded() {
